@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>合约配置 — BitV Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060C18;--surface:#0B1220;--card:#0F1A2E;--card2:#132035;
+  --border:#1A2B42;--border2:#243650;
+  --cyan:#00C6E0;--cyan-a:rgba(0,198,224,.12);
+  --indigo:#7C78EE;--indigo-a:rgba(124,120,238,.12);
+  --success:#00D4A0;--success-a:rgba(0,212,160,.12);
+  --warning:#FFB300;--warning-a:rgba(255,179,0,.12);
+  --danger:#FF4757;--danger-a:rgba(255,71,87,.12);
+  --orange:#FF6B35;--orange-a:rgba(255,107,53,.12);
+  --t1:#DDE6F0;--t2:#6B85A2;--t3:#384C64;
+  --font-sans:'Plus Jakarta Sans','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-mono:'Space Mono','Courier New',monospace;
+  --font-display:'Syne','PingFang SC',sans-serif;
+  --r:8px;--r2:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:var(--font-sans);font-size:13px;display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo-text{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--cyan);letter-spacing:1px}
+.logo-sub{font-size:10px;color:var(--t3);margin-top:2px;letter-spacing:.5px}
+nav{padding:16px 12px;flex:1}
+.nav-section{font-size:10px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;padding:0 8px 8px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);color:var(--t2);text-decoration:none;font-size:12.5px;font-weight:500;transition:.15s;margin-bottom:2px}
+.nav-item:hover{background:var(--card);color:var(--t1)}
+.nav-item.active{background:var(--cyan-a);color:var(--cyan)}
+.nav-icon{width:16px;text-align:center;font-size:14px}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
+.admin-badge{display:flex;align-items:center;gap:8px}
+.admin-avatar{width:28px;height:28px;border-radius:50%;background:var(--cyan-a);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--cyan);font-weight:700}
+.admin-name{font-size:11px;color:var(--t2)}
+.admin-role{font-size:10px;color:var(--t3)}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:10}
+.page-title{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--t1)}
+.page-sub{font-size:11px;color:var(--t3);margin-left:12px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.sfc-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;border:1px solid rgba(0,198,224,.3);background:var(--cyan-a);font-size:10px;color:var(--cyan);font-weight:600;letter-spacing:.5px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.btn-primary{background:var(--cyan);color:#060C18}
+.btn-primary:hover{background:#00b3cb}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-danger{background:var(--danger-a);color:var(--danger);border:1px solid rgba(255,71,87,.3)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-warning{background:var(--warning-a);color:var(--warning);border:1px solid rgba(255,179,0,.3)}
+
+.content{padding:24px 28px;flex:1}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px}
+.tab{padding:10px 20px;font-size:12.5px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s;user-select:none}
+.tab:hover{color:var(--t2)}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+
+/* ── Contract List Panel ── */
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.panel-title{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--t1)}
+
+/* ── Status Tags ── */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.tag-active{background:var(--success-a);color:var(--success);border:1px solid rgba(0,212,160,.2)}
+.tag-draft{background:var(--warning-a);color:var(--warning);border:1px solid rgba(255,179,0,.2)}
+.tag-paused{background:var(--danger-a);color:var(--danger);border:1px solid rgba(255,71,87,.2)}
+.tag-sfc{background:var(--cyan-a);color:var(--cyan);border:1px solid rgba(0,198,224,.2);font-size:9px}
+.tag-indigo{background:var(--indigo-a);color:var(--indigo);border:1px solid rgba(124,120,238,.2)}
+
+/* ── Contract Card List ── */
+.contract-list{display:flex;flex-direction:column;gap:0;border-radius:var(--r2);border:1px solid var(--border);overflow:hidden;background:var(--card)}
+.contract-row{display:grid;grid-template-columns:200px 80px 100px 100px 100px 120px 140px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);transition:.1s;gap:8px}
+.contract-row:last-child{border-bottom:none}
+.contract-row:hover{background:var(--card2)}
+.contract-row.header{font-size:10px;color:var(--t3);font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:10px 20px;background:rgba(0,0,0,.2);border-bottom:1px solid var(--border)}
+.contract-name{display:flex;align-items:center;gap:10px}
+.contract-icon{width:32px;height:32px;border-radius:50%;background:var(--cyan-a);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--cyan);font-family:var(--font-display)}
+.contract-label{font-weight:600;font-size:13px;color:var(--t1)}
+.contract-type{font-size:10px;color:var(--t3);margin-top:1px}
+.mono{font-family:var(--font-mono);font-size:12px}
+.row-actions{display:flex;gap:6px}
+
+/* ── Detail Config Panel ── */
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.config-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:20px}
+.section-heading{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--t2);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-heading-icon{color:var(--cyan)}
+
+.param-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.param-item{display:flex;flex-direction:column;gap:4px;padding:12px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border)}
+.param-label{font-size:10px;color:var(--t3);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.param-value{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--t1)}
+.param-unit{font-size:10px;color:var(--t2);margin-top:2px}
+.param-editable{display:flex;align-items:center;gap:8px}
+.param-input{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--t1);font-family:var(--font-mono);font-size:13px;padding:6px 10px;width:100%;outline:none;transition:.15s}
+.param-input:focus{border-color:var(--cyan)}
+
+/* ── Margin Tiers Table ── */
+.margin-table{width:100%;border-collapse:collapse}
+.margin-table th{padding:9px 12px;text-align:left;font-size:10px;color:var(--t3);font-weight:600;letter-spacing:.8px;text-transform:uppercase;background:rgba(0,0,0,.2);border-bottom:1px solid var(--border)}
+.margin-table td{padding:12px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--t1)}
+.margin-table tr:last-child td{border-bottom:none}
+.margin-table tr:hover td{background:var(--card2)}
+.margin-table .mono{font-family:var(--font-mono)}
+.tier-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;font-size:10px;font-weight:700;background:var(--indigo-a);color:var(--indigo)}
+
+/* ── Leverage Slider Visual ── */
+.leverage-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:20px;margin-bottom:20px}
+.leverage-tiers{display:flex;gap:0;margin-top:16px;border-radius:var(--r);overflow:hidden;height:40px}
+.leverage-tier-bar{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--font-mono);transition:.2s;position:relative;cursor:default}
+.leverage-tier-bar:hover{filter:brightness(1.15)}
+.lev-1{background:rgba(0,212,160,.25);color:var(--success);flex:2}
+.lev-2{background:rgba(0,198,224,.25);color:var(--cyan);flex:3}
+.lev-3{background:rgba(124,120,238,.25);color:var(--indigo);flex:3}
+.lev-4{background:rgba(255,179,0,.25);color:var(--warning);flex:2}
+.lev-5{background:rgba(255,71,87,.2);color:var(--danger);flex:1}
+
+/* ── Funding Rate Config ── */
+.funding-formula{background:var(--bg);border:1px solid var(--border2);border-radius:var(--r);padding:16px;margin-top:12px;font-family:var(--font-mono);font-size:12px;line-height:1.8;color:var(--t2)}
+.funding-formula .formula-line{display:flex;gap:12px}
+.formula-label{color:var(--t3);min-width:200px}
+.formula-value{color:var(--cyan)}
+
+/* ── Audit Log ── */
+.audit-log{display:flex;flex-direction:column;gap:0;border-radius:var(--r2);border:1px solid var(--border);overflow:hidden;background:var(--card)}
+.audit-row{display:grid;grid-template-columns:140px 120px 120px 1fr 100px;align-items:start;padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;gap:8px}
+.audit-row:last-child{border-bottom:none}
+.audit-row.header{font-size:10px;color:var(--t3);font-weight:600;letter-spacing:.8px;text-transform:uppercase;background:rgba(0,0,0,.2)}
+.audit-change{display:flex;align-items:center;gap:6px;font-size:11px}
+.audit-old{color:var(--danger);text-decoration:line-through;font-family:var(--font-mono)}
+.audit-new{color:var(--success);font-family:var(--font-mono)}
+.audit-arrow{color:var(--t3)}
+
+/* ── Diff Highlight ── */
+.diff-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px;font-size:10px;font-family:var(--font-mono)}
+.diff-inc{background:var(--success-a);color:var(--success)}
+.diff-dec{background:var(--danger-a);color:var(--danger)}
+
+/* ── Alert Notice ── */
+.alert-notice{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:var(--r);border-left:3px solid var(--warning);background:var(--warning-a);margin-bottom:20px}
+.alert-icon{font-size:16px;margin-top:1px}
+.alert-text{font-size:12px;line-height:1.6;color:var(--t2)}
+.alert-text strong{color:var(--t1)}
+
+/* ── Full width section ── */
+.full-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:20px;margin-bottom:20px}
+
+/* ── Scrollable content area ── */
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ── Risk Params ── */
+.risk-param-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.risk-param-card{padding:14px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border);border-left:3px solid var(--indigo)}
+.risk-param-card.warn{border-left-color:var(--warning)}
+.risk-param-card.danger{border-left-color:var(--danger)}
+.rpcard-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.rpcard-value{font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--t1)}
+.rpcard-desc{font-size:10px;color:var(--t3);margin-top:4px;line-height:1.5}
+.rpcard-edit{margin-top:10px}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-text">BitV Admin</div>
+    <div class="logo-sub">VATP BACKEND · HK SFC REGULATED</div>
+  </div>
+  <nav>
+    <div class="nav-section">核心监控</div>
+    <a href="01_总控台.html" class="nav-item"><span class="nav-icon">⬡</span>总控台</a>
+    <div class="nav-section">用户与合规</div>
+    <a href="02_用户管理.html" class="nav-item"><span class="nav-icon">◎</span>用户管理 / PI 审核</a>
+    <div class="nav-section">风险管理</div>
+    <a href="03_风控监控.html" class="nav-item"><span class="nav-icon">◈</span>风控监控</a>
+    <a href="04_强平管理.html" class="nav-item"><span class="nav-icon">▽</span>强制平仓管理</a>
+    <a href="05_保险基金.html" class="nav-item"><span class="nav-icon">◉</span>保险基金</a>
+    <a href="06_ADL系统.html" class="nav-item"><span class="nav-icon">⇅</span>ADL 系统</a>
+    <div class="nav-section">系统配置</div>
+    <a href="07_合约配置.html" class="nav-item active"><span class="nav-icon">⊞</span>合约配置</a>
+    <a href="08_资金费率.html" class="nav-item"><span class="nav-icon">↻</span>资金费率</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-badge">
+      <div class="admin-avatar">SA</div>
+      <div>
+        <div class="admin-name">Super Admin</div>
+        <div class="admin-role">Chief Risk Officer</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div style="display:flex;align-items:center">
+      <span class="page-title">合约配置</span>
+      <span class="page-sub">Contract Parameter Management</span>
+    </div>
+    <div class="topbar-right">
+      <div class="sfc-badge">⬡ SFC VATP COMPLIANT</div>
+      <button class="btn btn-ghost btn-sm">⬇ 导出配置</button>
+      <button class="btn btn-primary btn-sm" onclick="showSaveModal()">保存所有修改</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Alert Notice -->
+    <div class="alert-notice">
+      <span class="alert-icon">⚠</span>
+      <div class="alert-text">
+        <strong>SFC 合规提醒：</strong>所有合约参数变更需由 Chief Risk Officer（CRO）与 Compliance Officer（CO）双人授权，且须在变更生效前 <strong>3 个工作日</strong> 提交至 SFC 备案。变更日志将自动存档并于每季度合规报告中披露。
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'tab-contracts')">合约列表</div>
+      <div class="tab" onclick="switchTab(this,'tab-params')">交易参数</div>
+      <div class="tab" onclick="switchTab(this,'tab-margin')">保证金档位</div>
+      <div class="tab" onclick="switchTab(this,'tab-risk')">风控参数</div>
+      <div class="tab" onclick="switchTab(this,'tab-funding')">资金费率配置</div>
+      <div class="tab" onclick="switchTab(this,'tab-audit')">修改审计日志</div>
+    </div>
+
+    <!-- ══════════ TAB 1: Contract List ══════════ -->
+    <div class="tab-content active" id="tab-contracts">
+      <div class="panel-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="panel-title">永续合约列表</span>
+          <span class="tag tag-sfc">SFC 审核合约</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm">筛选</button>
+          <button class="btn btn-primary btn-sm">+ 新增合约</button>
+        </div>
+      </div>
+
+      <div class="contract-list">
+        <div class="contract-row header">
+          <span>合约</span>
+          <span>状态</span>
+          <span>当前价格</span>
+          <span>24H 成交量</span>
+          <span>持仓量</span>
+          <span>资金费率</span>
+          <span>操作</span>
+        </div>
+
+        <!-- BTC -->
+        <div class="contract-row">
+          <div class="contract-name">
+            <div class="contract-icon">₿</div>
+            <div>
+              <div class="contract-label">BTCUSDT</div>
+              <div class="contract-type">U-margined · 最高20x</div>
+            </div>
+          </div>
+          <span class="tag tag-active">● 交易中</span>
+          <span class="mono">$83,241.50</span>
+          <span class="mono">$142.8M</span>
+          <span class="mono">$45.2M</span>
+          <span class="mono" style="color:var(--success)">+0.0082%</span>
+          <div class="row-actions">
+            <button class="btn btn-ghost btn-sm" onclick="switchTab(document.querySelector('.tab:nth-child(2)'),'tab-params')">编辑参数</button>
+            <button class="btn btn-warning btn-sm">暂停</button>
+          </div>
+        </div>
+
+        <!-- ETH -->
+        <div class="contract-row">
+          <div class="contract-name">
+            <div class="contract-icon" style="background:var(--indigo-a);color:var(--indigo)">Ξ</div>
+            <div>
+              <div class="contract-label">ETHUSDT</div>
+              <div class="contract-type">U-margined · 最高20x</div>
+            </div>
+          </div>
+          <span class="tag tag-active">● 交易中</span>
+          <span class="mono">$2,156.30</span>
+          <span class="mono">$88.4M</span>
+          <span class="mono">$23.1M</span>
+          <span class="mono" style="color:var(--success)">+0.0105%</span>
+          <div class="row-actions">
+            <button class="btn btn-ghost btn-sm">编辑参数</button>
+            <button class="btn btn-warning btn-sm">暂停</button>
+          </div>
+        </div>
+
+        <!-- SOL -->
+        <div class="contract-row">
+          <div class="contract-name">
+            <div class="contract-icon" style="background:var(--orange-a);color:var(--orange)">◎</div>
+            <div>
+              <div class="contract-label">SOLUSDT</div>
+              <div class="contract-type">U-margined · 最高10x</div>
+            </div>
+          </div>
+          <span class="tag tag-active">● 交易中</span>
+          <span class="mono">$182.40</span>
+          <span class="mono">$31.2M</span>
+          <span class="mono">$8.7M</span>
+          <span class="mono" style="color:var(--danger)">-0.0210%</span>
+          <div class="row-actions">
+            <button class="btn btn-ghost btn-sm">编辑参数</button>
+            <button class="btn btn-warning btn-sm">暂停</button>
+          </div>
+        </div>
+
+        <!-- BNB - Draft -->
+        <div class="contract-row" style="opacity:.75">
+          <div class="contract-name">
+            <div class="contract-icon" style="background:var(--warning-a);color:var(--warning)">B</div>
+            <div>
+              <div class="contract-label">BNBUSDT</div>
+              <div class="contract-type">U-margined · 最高10x</div>
+            </div>
+          </div>
+          <span class="tag tag-draft">◌ 草稿</span>
+          <span class="mono" style="color:var(--t3)">—</span>
+          <span class="mono" style="color:var(--t3)">—</span>
+          <span class="mono" style="color:var(--t3)">—</span>
+          <span class="mono" style="color:var(--t3)">—</span>
+          <div class="row-actions">
+            <button class="btn btn-primary btn-sm">配置 &amp; 上线</button>
+            <button class="btn btn-ghost btn-sm">删除</button>
+          </div>
+        </div>
+
+        <!-- XRP - Paused -->
+        <div class="contract-row" style="opacity:.65">
+          <div class="contract-name">
+            <div class="contract-icon" style="background:rgba(107,133,162,.15);color:var(--t2)">X</div>
+            <div>
+              <div class="contract-label">XRPUSDT</div>
+              <div class="contract-type">U-margined · 最高10x</div>
+            </div>
+          </div>
+          <span class="tag tag-paused">⊗ 已暂停</span>
+          <span class="mono" style="color:var(--t3)">$0.5821</span>
+          <span class="mono" style="color:var(--t3)">—</span>
+          <span class="mono" style="color:var(--t3)">$1.2M</span>
+          <span class="mono" style="color:var(--t3)">—</span>
+          <div class="row-actions">
+            <button class="btn btn-ghost btn-sm">编辑参数</button>
+            <button class="btn btn-primary btn-sm">恢复上线</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:0 4px">
+        <span style="font-size:11px;color:var(--t3)">共 5 个合约 · 3 个运行中 · 1 个草稿 · 1 个暂停 | SFC 已备案 3 个</span>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm">← 上一页</button>
+          <button class="btn btn-ghost btn-sm" style="background:var(--cyan-a);color:var(--cyan)">1</button>
+          <button class="btn btn-ghost btn-sm">下一页 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 2: Trade Params ══════════ -->
+    <div class="tab-content" id="tab-params">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="contract-icon" style="width:36px;height:36px;font-size:15px">₿</div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:16px;font-weight:700">BTCUSDT 永续合约</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px">交易参数配置 · 上次修改：2026-02-28 14:32 HKT · CRO: S.Chan</div>
+          </div>
+          <span class="tag tag-sfc">SFC 备案中</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select style="background:var(--card);border:1px solid var(--border2);color:var(--t1);padding:6px 10px;border-radius:var(--r);font-size:12px;outline:none">
+            <option>BTCUSDT</option>
+            <option>ETHUSDT</option>
+            <option>SOLUSDT</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Leverage Visual -->
+      <div class="leverage-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="section-heading" style="margin-bottom:0"><span class="section-heading-icon">▲</span>杠杆档位配置（最高 20x · SFC PI限制）</div>
+          <span class="tag tag-sfc">SFC 上限：20x</span>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:16px">仓位名义价值越大，最高允许杠杆倍数越低（阶梯保证金机制）</div>
+        <div class="leverage-tiers">
+          <div class="leverage-tier-bar lev-1">1x–5x<br><span style="font-size:9px;opacity:.8">&lt;$50K</span></div>
+          <div class="leverage-tier-bar lev-2">5x–10x<br><span style="font-size:9px;opacity:.8">$50K–$200K</span></div>
+          <div class="leverage-tier-bar lev-3">10x–15x<br><span style="font-size:9px;opacity:.8">$200K–$500K</span></div>
+          <div class="leverage-tier-bar lev-4">15x–20x<br><span style="font-size:9px;opacity:.8">$500K–$1M</span></div>
+          <div class="leverage-tier-bar lev-5">≤5x<br><span style="font-size:9px;opacity:.8">&gt;$1M</span></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--t3)">
+          <span>低风险区间</span>
+          <span>→ 仓位规模递增 →</span>
+          <span>高风险 / 大仓位</span>
+        </div>
+      </div>
+
+      <!-- Param Grid -->
+      <div class="config-grid">
+        <div class="config-section">
+          <div class="section-heading"><span class="section-heading-icon">⊞</span>价格与最小单位</div>
+          <div class="param-grid">
+            <div class="param-item">
+              <span class="param-label">Tick Size（最小价格变动）</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.10">
+                <span style="font-size:11px;color:var(--t3)">USDT</span>
+              </div>
+              <span class="param-unit">1 tick = 0.10 USDT</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">Lot Size（最小数量步长）</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.001">
+                <span style="font-size:11px;color:var(--t3)">BTC</span>
+              </div>
+              <span class="param-unit">最小交易单位</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">最小名义价值</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="100">
+                <span style="font-size:11px;color:var(--t3)">USDT</span>
+              </div>
+              <span class="param-unit">Min Notional Value</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">报价精度（小数位）</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="2">
+                <span style="font-size:11px;color:var(--t3)">位</span>
+              </div>
+              <span class="param-unit">价格显示精度</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <div class="section-heading"><span class="section-heading-icon">⟺</span>订单规模限制</div>
+          <div class="param-grid">
+            <div class="param-item">
+              <span class="param-label">单笔最大下单量</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="100">
+                <span style="font-size:11px;color:var(--t3)">BTC</span>
+              </div>
+              <span class="param-unit">Max Order Qty</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">单账户最大持仓</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="500">
+                <span style="font-size:11px;color:var(--t3)">BTC</span>
+              </div>
+              <span class="param-unit">Max Position Size</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">单笔最大名义价值</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="5,000,000">
+                <span style="font-size:11px;color:var(--t3)">USDT</span>
+              </div>
+              <span class="param-unit">Max Order Notional</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">最大未成交委托数</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="200">
+                <span style="font-size:11px;color:var(--t3)">笔</span>
+              </div>
+              <span class="param-unit">Max Open Orders</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <div class="section-heading"><span class="section-heading-icon">◈</span>强平与保证金参数</div>
+          <div class="param-grid">
+            <div class="param-item">
+              <span class="param-label">初始保证金率（1x）</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="5.00">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">Initial Margin Rate @ 20x</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">维持保证金率（基础）</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.50">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">Maintenance Margin Rate</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">强平手续费率</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="1.25">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">Liquidation Fee Rate</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">保证金预警阈值</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="110">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">MM Warning Ratio</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <div class="section-heading"><span class="section-heading-icon">↻</span>手续费配置</div>
+          <div class="param-grid">
+            <div class="param-item">
+              <span class="param-label">Maker 费率</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.020">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">限价单成交</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">Taker 费率</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.050">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">市价单成交</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">交割结算费率</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.010">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">资金费率结算</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">强平Taker加收</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.000">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">额外费用（通常为0）</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+        <button class="btn btn-ghost">重置为当前值</button>
+        <button class="btn btn-primary" onclick="showSaveModal()">提交修改（双人授权）</button>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 3: Margin Tiers ══════════ -->
+    <div class="tab-content" id="tab-margin">
+      <div class="full-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div class="section-heading" style="margin-bottom:0"><span class="section-heading-icon">⬡</span>BTCUSDT 阶梯保证金档位</div>
+          <div style="display:flex;gap:8px">
+            <select style="background:var(--card);border:1px solid var(--border2);color:var(--t1);padding:6px 10px;border-radius:var(--r);font-size:12px;outline:none">
+              <option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option>
+            </select>
+            <button class="btn btn-primary btn-sm">+ 添加档位</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:16px">仓位名义价值（Notional）越大，维持保证金率越高，最高杠杆越低。SFC 要求最高杠杆不超过 20x。</div>
+        <table class="margin-table">
+          <thead>
+            <tr>
+              <th>档位</th>
+              <th>仓位区间（USDT 名义价值）</th>
+              <th>最高杠杆</th>
+              <th>初始保证金率</th>
+              <th>维持保证金率</th>
+              <th>维持保证金额（快速平仓量）</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tier-badge">1</span></td>
+              <td class="mono">$0 – $50,000</td>
+              <td class="mono" style="color:var(--success)">20x</td>
+              <td class="mono">5.00%</td>
+              <td class="mono">0.50%</td>
+              <td class="mono">$0</td>
+              <td><button class="btn btn-ghost btn-sm">编辑</button></td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge">2</span></td>
+              <td class="mono">$50,001 – $200,000</td>
+              <td class="mono" style="color:var(--cyan)">10x</td>
+              <td class="mono">10.00%</td>
+              <td class="mono">0.65%</td>
+              <td class="mono">$75</td>
+              <td><button class="btn btn-ghost btn-sm">编辑</button></td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge">3</span></td>
+              <td class="mono">$200,001 – $500,000</td>
+              <td class="mono" style="color:var(--indigo)">8x</td>
+              <td class="mono">12.50%</td>
+              <td class="mono">1.00%</td>
+              <td class="mono">$770</td>
+              <td><button class="btn btn-ghost btn-sm">编辑</button></td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge">4</span></td>
+              <td class="mono">$500,001 – $1,000,000</td>
+              <td class="mono" style="color:var(--warning)">5x</td>
+              <td class="mono">20.00%</td>
+              <td class="mono">1.50%</td>
+              <td class="mono">$3,270</td>
+              <td><button class="btn btn-ghost btn-sm">编辑</button></td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge">5</span></td>
+              <td class="mono">$1,000,001 – $2,000,000</td>
+              <td class="mono" style="color:var(--orange)">4x</td>
+              <td class="mono">25.00%</td>
+              <td class="mono">2.00%</td>
+              <td class="mono">$8,270</td>
+              <td><button class="btn btn-ghost btn-sm">编辑</button></td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge">6</span></td>
+              <td class="mono">$2,000,001 – $5,000,000</td>
+              <td class="mono" style="color:var(--danger)">3x</td>
+              <td class="mono">33.33%</td>
+              <td class="mono">2.50%</td>
+              <td class="mono">$18,270</td>
+              <td><button class="btn btn-ghost btn-sm">编辑</button></td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge">7</span></td>
+              <td class="mono">&gt; $5,000,000</td>
+              <td class="mono" style="color:var(--danger)">2x</td>
+              <td class="mono">50.00%</td>
+              <td class="mono">3.00%</td>
+              <td class="mono">$43,270</td>
+              <td><button class="btn btn-ghost btn-sm">编辑</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:16px;padding:12px;background:var(--cyan-a);border-radius:var(--r);border:1px solid rgba(0,198,224,.2)">
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">
+            <span style="color:var(--cyan);font-weight:600">SFC 要求 · </span>
+            根据证监会 ASPIRe PillarP 指引，VATP 须为专业投资者（PI）设置合理的阶梯杠杆限制，最高不得超过 <strong style="color:var(--t1)">20倍</strong>（低于主要离岸交易所 125x 上限），以降低系统性风险。维持保证金率须确保在极端市场条件下（99.5% VaR）不产生穿仓亏损。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 4: Risk Params ══════════ -->
+    <div class="tab-content" id="tab-risk">
+      <div class="full-section">
+        <div class="section-heading"><span class="section-heading-icon">◈</span>全局风险参数 · BTCUSDT</div>
+        <div class="risk-param-grid">
+          <div class="risk-param-card">
+            <div class="rpcard-label">标记价格偏差熔断</div>
+            <div class="rpcard-value">1.50%</div>
+            <div class="rpcard-desc">标记价格与最新成交价偏差超过此值时暂停撮合，防价格操纵</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="1.50" style="font-size:12px"></div>
+          </div>
+          <div class="risk-param-card warn">
+            <div class="rpcard-label">系统最大持仓上限（双向）</div>
+            <div class="rpcard-value">5,000 BTC</div>
+            <div class="rpcard-desc">全平台多空合计持仓超过此值触发流动性预警</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="5000" style="font-size:12px"></div>
+          </div>
+          <div class="risk-param-card danger">
+            <div class="rpcard-label">单账户净头寸上限</div>
+            <div class="rpcard-value">500 BTC</div>
+            <div class="rpcard-desc">单个 PI 账户净多/净空持仓不得超过此值</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="500" style="font-size:12px"></div>
+          </div>
+          <div class="risk-param-card">
+            <div class="rpcard-label">指数价格源权重再平衡周期</div>
+            <div class="rpcard-value">1 小时</div>
+            <div class="rpcard-desc">当某指数源价格偏差超过阈值，自动调低权重比例</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="60" style="font-size:12px"></div>
+          </div>
+          <div class="risk-param-card warn">
+            <div class="rpcard-label">ADL 触发最低保证金率</div>
+            <div class="rpcard-value">80%</div>
+            <div class="rpcard-desc">保险基金余额降至基准线 80% 时才允许触发 ADL</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="80" style="font-size:12px"></div>
+          </div>
+          <div class="risk-param-card danger">
+            <div class="rpcard-label">保险基金最低储备（SFC）</div>
+            <div class="rpcard-value">$12,000,000</div>
+            <div class="rpcard-desc">SFC 要求的最低实时储备，跌破需立即报告</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="12000000" style="font-size:12px"></div>
+          </div>
+          <div class="risk-param-card">
+            <div class="rpcard-label">强平降价步幅（Taker价）</div>
+            <div class="rpcard-value">0.50%</div>
+            <div class="rpcard-desc">每次尝试止损单不成交时，价格降低的比例</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="0.50" style="font-size:12px"></div>
+          </div>
+          <div class="risk-param-card">
+            <div class="rpcard-label">大额单限制（SFC AML）</div>
+            <div class="rpcard-value">$100,000</div>
+            <div class="rpcard-desc">单笔名义价值超过此阈值需触发人工 AML 审核</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="100000" style="font-size:12px"></div>
+          </div>
+          <div class="risk-param-card warn">
+            <div class="rpcard-label">流动性提供方最低深度</div>
+            <div class="rpcard-value">$500,000</div>
+            <div class="rpcard-desc">Backstop Liquidity Provider 须维持的最低双边挂单深度（SFC条款）</div>
+            <div class="rpcard-edit"><input class="param-input" type="text" value="500000" style="font-size:12px"></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+          <button class="btn btn-ghost">重置</button>
+          <button class="btn btn-primary" onclick="showSaveModal()">提交修改（CRO + CO 双授权）</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 5: Funding Rate Config ══════════ -->
+    <div class="tab-content" id="tab-funding">
+      <div class="config-grid">
+        <div class="config-section" style="grid-column:1/-1">
+          <div class="section-heading"><span class="section-heading-icon">↻</span>资金费率全局配置（SFC 强制披露）</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+            <div class="param-item">
+              <span class="param-label">结算周期</span>
+              <div class="param-editable">
+                <select style="background:var(--bg);border:1px solid var(--border2);color:var(--t1);padding:6px 10px;border-radius:6px;font-size:13px;font-family:var(--font-mono);outline:none;width:100%">
+                  <option>每8小时</option><option>每4小时</option><option>每12小时</option>
+                </select>
+              </div>
+              <span class="param-unit">UTC 00:00 / 08:00 / 16:00</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">费率上限（Cap）</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.3000">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">单次结算上限</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">费率下限（Floor）</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="-0.3000">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">单次结算下限</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">利率基准（R）</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.0100">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">每8小时固定利率</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <div class="section-heading"><span class="section-heading-icon">⊞</span>溢价指数（Premium Index）计算参数</div>
+          <div class="param-grid" style="margin-bottom:16px">
+            <div class="param-item">
+              <span class="param-label">TWAP 采样间隔</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="5">
+                <span style="font-size:11px;color:var(--t3)">秒</span>
+              </div>
+              <span class="param-unit">每5秒采样一次</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">TWAP 窗口期</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="8">
+                <span style="font-size:11px;color:var(--t3)">小时</span>
+              </div>
+              <span class="param-unit">5,760 个样本 / 周期</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">单次溢价偏离上限</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="0.50">
+                <span style="font-size:11px;color:var(--t3)">%</span>
+              </div>
+              <span class="param-unit">Impact Mid Price 偏差上限</span>
+            </div>
+            <div class="param-item">
+              <span class="param-label">Impact Notional</span>
+              <div class="param-editable">
+                <input class="param-input" type="text" value="60,000">
+                <span style="font-size:11px;color:var(--t3)">USDT</span>
+              </div>
+              <span class="param-unit">用于计算撮合深度</span>
+            </div>
+          </div>
+          <div class="funding-formula">
+            <div class="formula-line"><span class="formula-label">溢价指数 P =</span><span class="formula-value">max(0, ImpactBidPrice − Index) − max(0, Index − ImpactAskPrice)</span></div>
+            <div class="formula-line"><span class="formula-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="formula-value">─────────────────────────────────────────</span></div>
+            <div class="formula-line"><span class="formula-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="formula-value">Index Price</span></div>
+            <div style="margin-top:8px"></div>
+            <div class="formula-line"><span class="formula-label">资金费率 F =</span><span class="formula-value">clamp(P_TWAP + clamp(R − P_TWAP, −Cap, Cap), −Cap, Cap)</span></div>
+            <div class="formula-line"><span class="formula-label">结算金额 =</span><span class="formula-value">F × 名义仓位价值 （多头支付空头 / 空头支付多头）</span></div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <div class="section-heading"><span class="section-heading-icon">◉</span>标记价格（Mark Price）配置</div>
+          <div style="margin-bottom:16px;font-size:11px;color:var(--t3);line-height:1.6">标记价格采用三值中位数法（Median of 3），防止单一数据源操纵价格触发强平。SFC 要求标记价格计算逻辑必须公开披露。</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="padding:12px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--t1)">价格来源 1：指数价格</div>
+                <div style="font-size:10px;color:var(--t3);margin-top:2px">8所交易所加权平均（按成交量）</div>
+              </div>
+              <input class="param-input" type="text" value="权重：动态" style="width:120px;font-size:11px">
+            </div>
+            <div style="padding:12px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--t1)">价格来源 2：EMA 平滑价格</div>
+                <div style="font-size:10px;color:var(--t3);margin-top:2px">指数价格的5分钟EMA（平滑极端波动）</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <input class="param-input" type="text" value="300" style="width:60px;font-size:11px">
+                <span style="font-size:10px;color:var(--t3)">秒</span>
+              </div>
+            </div>
+            <div style="padding:12px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--t1)">价格来源 3：最新成交价</div>
+                <div style="font-size:10px;color:var(--t3);margin-top:2px">本平台最新成交记录（Last Trade Price）</div>
+              </div>
+              <span class="tag tag-active" style="font-size:10px">实时</span>
+            </div>
+            <div style="padding:10px 14px;border-radius:var(--r);background:var(--cyan-a);border:1px solid rgba(0,198,224,.2);font-size:11px;color:var(--t2)">
+              <span style="color:var(--cyan);font-weight:600">标记价格 = </span>Median（价格1, 价格2, 价格3）· 三值取中位数，规避任意单源异常
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+        <button class="btn btn-ghost">重置</button>
+        <button class="btn btn-primary" onclick="showSaveModal()">提交修改（双人授权）</button>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 6: Audit Log ══════════ -->
+    <div class="tab-content" id="tab-audit">
+      <div class="panel-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="panel-title">参数修改审计日志</span>
+          <span class="tag tag-sfc">SFC 强制存档</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <select style="background:var(--card);border:1px solid var(--border2);color:var(--t1);padding:6px 10px;border-radius:var(--r);font-size:12px;outline:none">
+            <option>全部合约</option><option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option>
+          </select>
+          <select style="background:var(--card);border:1px solid var(--border2);color:var(--t1);padding:6px 10px;border-radius:var(--r);font-size:12px;outline:none">
+            <option>最近30天</option><option>最近7天</option><option>本季度</option><option>自定义</option>
+          </select>
+          <button class="btn btn-ghost btn-sm">⬇ 导出</button>
+        </div>
+      </div>
+
+      <div class="audit-log">
+        <div class="audit-row header">
+          <span>时间 (HKT)</span>
+          <span>操作员</span>
+          <span>合约 / 参数</span>
+          <span>变更内容</span>
+          <span>状态</span>
+        </div>
+        <div class="audit-row">
+          <span class="mono" style="font-size:11px;color:var(--t2)">2026-02-28<br>14:32:05</span>
+          <span style="font-size:12px">S.Chan<br><span style="color:var(--t3);font-size:10px">CRO (主审)</span></span>
+          <span style="font-size:12px">BTCUSDT<br><span style="color:var(--t3);font-size:10px">强平手续费率</span></span>
+          <div class="audit-change">
+            <span class="audit-old">1.00%</span>
+            <span class="audit-arrow">→</span>
+            <span class="audit-new">1.25%</span>
+            <span class="diff-badge diff-inc">+0.25%</span>
+          </div>
+          <span class="tag tag-active" style="align-self:center">已生效</span>
+        </div>
+        <div class="audit-row">
+          <span class="mono" style="font-size:11px;color:var(--t2)">2026-02-28<br>14:32:05</span>
+          <span style="font-size:12px">K.Wong<br><span style="color:var(--t3);font-size:10px">CO (副审)</span></span>
+          <span style="font-size:12px">BTCUSDT<br><span style="color:var(--t3);font-size:10px">强平手续费率（副签）</span></span>
+          <div class="audit-change">
+            <span style="font-size:11px;color:var(--t3)">双人授权确认 · 数字签名验证通过</span>
+          </div>
+          <span class="tag tag-active" style="align-self:center">已确认</span>
+        </div>
+        <div class="audit-row">
+          <span class="mono" style="font-size:11px;color:var(--t2)">2026-02-20<br>09:15:42</span>
+          <span style="font-size:12px">S.Chan<br><span style="color:var(--t3);font-size:10px">CRO</span></span>
+          <span style="font-size:12px">ETHUSDT<br><span style="color:var(--t3);font-size:10px">单笔最大下单量</span></span>
+          <div class="audit-change">
+            <span class="audit-old">200 ETH</span>
+            <span class="audit-arrow">→</span>
+            <span class="audit-new">500 ETH</span>
+            <span class="diff-badge diff-inc">+300</span>
+          </div>
+          <span class="tag tag-active" style="align-self:center">已生效</span>
+        </div>
+        <div class="audit-row">
+          <span class="mono" style="font-size:11px;color:var(--t2)">2026-02-15<br>11:03:28</span>
+          <span style="font-size:12px">L.Lam<br><span style="color:var(--t3);font-size:10px">系统工程师</span></span>
+          <span style="font-size:12px">SOLUSDT<br><span style="color:var(--t3);font-size:10px">最高杠杆</span></span>
+          <div class="audit-change">
+            <span class="audit-old">20x</span>
+            <span class="audit-arrow">→</span>
+            <span class="audit-new">10x</span>
+            <span class="diff-badge diff-dec">-10x</span>
+          </div>
+          <span class="tag tag-active" style="align-self:center">已生效</span>
+        </div>
+        <div class="audit-row">
+          <span class="mono" style="font-size:11px;color:var(--t2)">2026-02-10<br>16:45:11</span>
+          <span style="font-size:12px">S.Chan<br><span style="color:var(--t3);font-size:10px">CRO</span></span>
+          <span style="font-size:12px">全局<br><span style="color:var(--t3);font-size:10px">标记价格偏差熔断</span></span>
+          <div class="audit-change">
+            <span class="audit-old">2.00%</span>
+            <span class="audit-arrow">→</span>
+            <span class="audit-new">1.50%</span>
+            <span class="diff-badge diff-dec">-0.50%</span>
+          </div>
+          <span class="tag tag-active" style="align-self:center">已生效</span>
+        </div>
+        <div class="audit-row">
+          <span class="mono" style="font-size:11px;color:var(--t2)">2026-01-28<br>10:22:33</span>
+          <span style="font-size:12px">T.Lee<br><span style="color:var(--t3);font-size:10px">Quant</span></span>
+          <span style="font-size:12px">BTCUSDT<br><span style="color:var(--t3);font-size:10px">Maker 费率</span></span>
+          <div class="audit-change">
+            <span class="audit-old">0.030%</span>
+            <span class="audit-arrow">→</span>
+            <span class="audit-new">0.020%</span>
+            <span class="diff-badge diff-dec">-0.010%</span>
+          </div>
+          <span class="tag tag-indigo" style="align-self:center">待CO副签</span>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:0 4px">
+        <span style="font-size:11px;color:var(--t3)">共 48 条记录 · 显示第 1–6 条 · 所有记录已加密存档，保留 7 年（SFC 要求）</span>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm">← 上一页</button>
+          <button class="btn btn-ghost btn-sm" style="background:var(--cyan-a);color:var(--cyan)">1</button>
+          <button class="btn btn-ghost btn-sm">2</button>
+          <button class="btn btn-ghost btn-sm">3</button>
+          <button class="btn btn-ghost btn-sm">下一页 →</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Save Modal Overlay -->
+<div id="save-modal" style="display:none;position:fixed;inset:0;background:rgba(6,12,24,.85);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:32px;width:460px;box-shadow:0 24px 64px rgba(0,0,0,.5)">
+    <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--t1);margin-bottom:8px">双人授权确认</div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:24px">合约参数变更须 CRO + CO 双人数字签名，且需在生效前 3 个工作日提交 SFC 备案。</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+      <div style="padding:14px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:6px">主审：Chief Risk Officer</div>
+        <input class="param-input" type="password" placeholder="输入 CRO 授权密码 / 硬件令牌 OTP" style="width:100%">
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:6px">副审：Compliance Officer</div>
+        <input class="param-input" type="password" placeholder="输入 CO 授权密码 / 硬件令牌 OTP" style="width:100%">
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:var(--r);border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:6px">SFC 备案生效日期</div>
+        <input class="param-input" type="text" value="2026-03-07" style="width:100%;font-family:var(--font-mono)">
+      </div>
+    </div>
+    <div style="padding:10px 14px;background:var(--warning-a);border-radius:var(--r);border:1px solid rgba(255,179,0,.2);font-size:11px;color:var(--warning);margin-bottom:20px">
+      ⚠ 此操作将自动生成 SFC 备案文件并推送至合规系统，不可撤销。
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" style="flex:1" onclick="document.getElementById('save-modal').style.display='none'">取消</button>
+      <button class="btn btn-primary" style="flex:2;justify-content:center">确认提交 &amp; 发送至 SFC</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(el, targetId) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const target = document.getElementById(targetId);
+  if(target) target.classList.add('active');
+}
+
+function showSaveModal() {
+  const m = document.getElementById('save-modal');
+  m.style.display = 'flex';
+}
+
+document.getElementById('save-modal').addEventListener('click', function(e){
+  if(e.target === this) this.style.display = 'none';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>BitV Admin · 风控实时监控</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060C18;--surface:#0B1220;--card:#0F1A2E;--card2:#132035;--border:#1A2B42;--border2:#243650;--cyan:#00C6E0;--cyan-a:rgba(0,198,224,0.12);--indigo:#7C78EE;--indigo-a:rgba(124,120,238,0.12);--success:#00D4A0;--success-a:rgba(0,212,160,0.12);--warning:#FFB300;--warning-a:rgba(255,179,0,0.12);--danger:#FF4757;--danger-a:rgba(255,71,87,0.12);--t1:#DDE6F0;--t2:#6B85A2;--t3:#384C64;--font-sans:'Plus Jakarta Sans','PingFang SC','Microsoft YaHei',sans-serif;--font-mono:'Space Mono','Courier New',monospace;--font-display:'Syne','PingFang SC',sans-serif}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--font-sans);font-size:14px;line-height:1.5;overflow:hidden}
+.shell{display:grid;grid-template-columns:224px 1fr;height:100vh}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,#00C6E0,#7C78EE);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:15px;font-weight:800;color:#fff;flex-shrink:0}
+.logo-text{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--t1);letter-spacing:-0.5px}.logo-sub{font-size:9.5px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase}
+.nav-section{padding:14px 12px 4px}.nav-label{font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);padding:0 8px;margin-bottom:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;color:var(--t2);font-size:13px;font-weight:500;transition:all .15s;text-decoration:none;margin-bottom:1px}
+.nav-item:hover{background:var(--card);color:var(--t1)}.nav-item.active{background:var(--cyan-a);color:var(--cyan);border:1px solid rgba(0,198,224,0.2)}
+.nav-icon{width:15px;height:15px;flex-shrink:0}.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px}.nav-badge.w{background:var(--warning);color:#000}
+.sidebar-footer{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}.sys-status{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;background:var(--success-a);border:1px solid rgba(0,212,160,0.2)}.pulse{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s ease-in-out infinite;flex-shrink:0}@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,160,0.6)}50%{box-shadow:0 0 0 4px rgba(0,212,160,0)}}.sys-label{font-size:11.5px;font-weight:600;color:var(--success)}
+.main{display:flex;flex-direction:column;overflow:hidden}.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.page-title{font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--t1);letter-spacing:-0.5px;margin-right:auto}.page-title span{color:var(--t3);font-size:12.5px;font-weight:500;margin-left:8px}
+.topbar-time{font-family:var(--font-mono);font-size:12.5px;color:var(--t2);background:var(--card);padding:5px 12px;border-radius:6px;border:1px solid var(--border)}.user-chip{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:4px 12px 4px 4px;cursor:pointer}.user-avatar{width:26px;height:26px;border-radius:5px;background:linear-gradient(135deg,var(--cyan),var(--indigo));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}.user-name{font-size:12px;font-weight:600;color:var(--t1)}.user-role{font-size:10px;color:var(--t2)}
+.content{flex:1;overflow-y:auto;padding:22px 28px;display:flex;flex-direction:column;gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden}.card-hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}.card-title{font-size:13px;font-weight:700;color:var(--t1);margin-right:auto}.card-sub{font-size:11px;color:var(--t2)}.card-bd{padding:16px 18px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:15px 13px}
+.kpi-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.kpi-value{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.kpi-delta{font-size:11px;color:var(--t2)}
+.c-danger{color:var(--danger)}.c-warn{color:var(--warning)}.c-ok{color:var(--success)}.c-cyan{color:var(--cyan)}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:13px}
+.grid3{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.chart-wrap{position:relative;height:200px}
+/* PRICE FEED */
+.feed-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border-bottom:none}
+.feed-name{font-size:12.5px;font-weight:600;color:var(--t1)}
+.feed-price{font-family:var(--font-mono);font-size:12.5px;color:var(--t1)}
+.feed-dev{font-family:var(--font-mono);font-size:11.5px;padding:2px 7px;border-radius:3px;font-weight:700}
+.dev-ok{background:var(--success-a);color:var(--success)}.dev-warn{background:var(--warning-a);color:var(--warning)}.dev-err{background:var(--danger-a);color:var(--danger)}
+.feed-weight{font-family:var(--font-mono);font-size:11px;color:var(--t2);width:50px;text-align:right}
+/* EVENT LOG */
+.ev-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(26,43,66,0.5)}
+.ev-item:last-child{border-bottom:none}
+.ev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.ev-time{font-family:var(--font-mono);font-size:10.5px;color:var(--t3);white-space:nowrap}
+.ev-msg{font-size:12px;color:var(--t1)}.ev-msg strong{color:var(--t1)}
+/* TABLE */
+.dt{width:100%;border-collapse:collapse;font-size:12.5px}.dt th{text-align:left;padding:7px 11px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--border)}.dt td{padding:9px 11px;color:var(--t1);border-bottom:1px solid rgba(26,43,66,0.5);vertical-align:middle}.dt tr:last-child td{border-bottom:none}.dt tr:hover td{background:var(--card2)}
+.mono{font-family:var(--font-mono);font-size:12px}.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:3px;font-size:10.5px;font-weight:700}.t-long{background:rgba(0,212,160,0.15);color:var(--success)}.t-short{background:var(--danger-a);color:var(--danger)}
+.mr-bar-w{width:68px;height:4px;background:var(--border);border-radius:99px;overflow:hidden}.mr-bar{height:100%;border-radius:99px}
+.act-btn{font-size:10.5px;padding:3px 8px;border-radius:4px;cursor:pointer;border:1px solid;font-family:var(--font-sans)}.btn-red{background:var(--danger-a);color:var(--danger);border-color:rgba(255,71,87,0.3)}.btn-warn{background:var(--warning-a);color:var(--warning);border-color:rgba(255,179,0,0.3)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="logo-mark">B</div><div><div class="logo-text">BitV Admin</div><div class="logo-sub">VATP · HK SFC</div></div></div>
+  <nav class="nav-section"><div class="nav-label">总览</div><a class="nav-item" href="01_总控台.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>总控台</a></nav>
+  <nav class="nav-section"><div class="nav-label">用户</div><a class="nav-item" href="02_用户管理.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5m4.5 2v4m-2-2h4"/></svg>用户管理 / PI审核 <span class="nav-badge w">12</span></a></nav>
+  <nav class="nav-section"><div class="nav-label">风控</div><a class="nav-item active" href="03_风控监控.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5L2 4v5c0 3 2.5 5 6 6 3.5-1 6-3 6-6V4L8 1.5z"/></svg>风控实时监控 <span class="nav-badge">7</span></a><a class="nav-item" href="04_强平管理.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v6l3 3"/><circle cx="8" cy="8" r="6"/></svg>强平管理</a></nav>
+  <nav class="nav-section"><div class="nav-label">SFC 合规</div><a class="nav-item" href="05_保险基金.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M5 4V3a3 3 0 016 0v1"/></svg>保险基金</a><a class="nav-item" href="06_ADL系统.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10L6 6l3 3 5-6"/></svg>ADL系统 <span class="nav-badge">3</span></a><a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h7M3 12h5"/></svg>合规报告</a></nav>
+  <nav class="nav-section"><div class="nav-label">配置</div><a class="nav-item" href="07_合约配置.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5"/></svg>合约参数配置</a></nav>
+  <div class="sidebar-footer"><div class="sys-status"><div class="pulse"></div><div><div class="sys-label">系统运行正常</div><div style="font-size:10px;color:var(--t2);margin-top:1px">所有模块在线</div></div></div></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="page-title">风控实时监控 <span>保证金 · 仓位预警 · 价格指数来源</span></div>
+    <div style="display:flex;align-items:center;gap:6px;background:var(--danger-a);border:1px solid rgba(255,71,87,0.3);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--danger)"><div style="width:6px;height:6px;border-radius:50%;background:var(--danger);animation:pulse 1.5s infinite"></div>实时更新中</div>
+    <div class="topbar-time" id="clock">HKT --:--:--</div>
+    <div class="user-chip"><div class="user-avatar">赵</div><div><div class="user-name">赵 Admin</div><div class="user-role">超级管理员</div></div></div>
+  </div>
+
+  <div class="content">
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-card" style="border-color:rgba(255,71,87,0.3);background:linear-gradient(160deg,var(--card) 60%,var(--danger-a))"><div class="kpi-label">危险区账户 (&gt;90%)</div><div class="kpi-value c-danger">7</div><div class="kpi-delta"><span style="color:var(--danger)">▲ 2</span> 较1小时前</div></div>
+      <div class="kpi-card" style="border-color:rgba(255,179,0,0.3)"><div class="kpi-label">预警区账户 (80-90%)</div><div class="kpi-value c-warn">13</div><div class="kpi-delta">较1小时前 持平</div></div>
+      <div class="kpi-card"><div class="kpi-label">最高保证金比率</div><div class="kpi-value c-danger">94.2%</div><div class="kpi-delta">PI-00892 · BTC多</div></div>
+      <div class="kpi-card"><div class="kpi-label">系统平均保证金比率</div><div class="kpi-value c-ok">32.1%</div><div class="kpi-delta">安全水位 ✓</div></div>
+      <div class="kpi-card"><div class="kpi-label">今日强制平仓</div><div class="kpi-value">3</div><div class="kpi-delta">总金额: $412,000</div></div>
+    </div>
+
+    <!-- ROW 2 -->
+    <div class="grid2">
+      <!-- Chart -->
+      <div class="card">
+        <div class="card-hd"><div class="card-title">全市场保证金比率趋势 (24H)</div><div class="card-sub">最大值 / 平均值 / 百分位90</div></div>
+        <div class="card-bd"><div class="chart-wrap"><canvas id="mrTrend"></canvas></div></div>
+      </div>
+      <!-- Price Feed Monitor -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">指数价格来源监控</div>
+          <div class="card-sub" style="display:flex;align-items:center;gap:5px">BTC · <span style="font-family:var(--font-mono);font-size:11px;color:var(--cyan)">$67,241.50</span></div>
+        </div>
+        <div class="card-bd" style="padding:10px 18px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding:0 0 6px;border-bottom:1px solid var(--border)">
+            <span style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.8px;text-transform:uppercase">来源</span>
+            <span style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.8px;text-transform:uppercase">现货价</span>
+            <span style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.8px;text-transform:uppercase">偏差</span>
+            <span style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.8px;text-transform:uppercase">权重</span>
+          </div>
+          <div class="feed-item"><span class="feed-name">Binance现货</span><span class="feed-price">$67,238.20</span><span class="feed-dev dev-ok">-0.005%</span><span class="feed-weight">18.4%</span></div>
+          <div class="feed-item"><span class="feed-name">Coinbase</span><span class="feed-price">$67,245.80</span><span class="feed-dev dev-ok">+0.007%</span><span class="feed-weight">15.2%</span></div>
+          <div class="feed-item"><span class="feed-name">Kraken</span><span class="feed-price">$67,240.10</span><span class="feed-dev dev-ok">-0.002%</span><span class="feed-weight">12.1%</span></div>
+          <div class="feed-item"><span class="feed-name">OKX现货</span><span class="feed-price">$67,243.50</span><span class="feed-dev dev-ok">+0.003%</span><span class="feed-weight">14.8%</span></div>
+          <div class="feed-item"><span class="feed-name">Bybit现货</span><span class="feed-price">$67,236.00</span><span class="feed-dev dev-ok">-0.008%</span><span class="feed-weight">11.3%</span></div>
+          <div class="feed-item"><span class="feed-name">Bitget</span><span class="feed-price">$67,248.90</span><span class="feed-dev dev-warn">+0.011%</span><span class="feed-weight">9.6%</span></div>
+          <div class="feed-item"><span class="feed-name">Gate现货</span><span class="feed-price">$67,239.40</span><span class="feed-dev dev-ok">-0.003%</span><span class="feed-weight">8.7%</span></div>
+          <div class="feed-item"><span class="feed-name">HTX现货</span><span class="feed-price">$67,241.80</span><span class="feed-dev dev-ok">+0.000%</span><span class="feed-weight">7.2%</span></div>
+          <div style="margin-top:10px;padding:8px 10px;border-radius:6px;background:var(--success-a);border:1px solid rgba(0,212,160,0.2);font-size:11px;color:var(--success)">✓ 所有来源偏差均在 ±1% 限幅保护范围内（主流对严格标准）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POSITION TABLE -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">⚠ 高风险仓位实时列表</div>
+        <div class="card-sub">保证金比率 &gt; 75% · 按风险由高到低排序</div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button style="font-size:11px;padding:4px 10px;border-radius:5px;background:var(--danger-a);color:var(--danger);border:1px solid rgba(255,71,87,0.3);cursor:pointer;font-family:var(--font-sans)">🔔 批量发送预警</button>
+          <button style="font-size:11px;padding:4px 10px;border-radius:5px;background:var(--card2);color:var(--t2);border:1px solid var(--border);cursor:pointer;font-family:var(--font-sans)">导出</button>
+        </div>
+      </div>
+      <table class="dt">
+        <thead><tr><th>账户ID</th><th>合约</th><th>方向</th><th>持仓量</th><th>名义价值</th><th>杠杆</th><th>开仓均价</th><th>标记价格</th><th>强平价格</th><th>保证金比率</th><th>UPNL</th><th>ADL灯</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="mono" style="color:var(--danger)">PI-00892</td>
+            <td>BTCUSDT</td><td><span class="tag t-long">多</span></td>
+            <td class="mono">74.2 BTC</td><td class="mono">$4,820,000</td>
+            <td class="mono" style="color:var(--warning)">10x</td>
+            <td class="mono">$62,400</td><td class="mono">$67,241</td>
+            <td class="mono" style="color:var(--danger)">$61,240</td>
+            <td><div style="display:flex;align-items:center;gap:6px"><div class="mr-bar-w"><div class="mr-bar" style="width:94%;background:var(--danger)"></div></div><span class="mono" style="color:var(--danger)">94.2%</span></div></td>
+            <td class="mono" style="color:var(--success)">+$361,540</td>
+            <td><div style="display:flex;gap:2px"><div style="width:9px;height:9px;border-radius:2px;background:var(--danger);box-shadow:0 0 5px var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger);box-shadow:0 0 5px var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger);box-shadow:0 0 5px var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger);box-shadow:0 0 5px var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger);box-shadow:0 0 5px var(--danger)"></div></div></td>
+            <td><button class="act-btn btn-red">强制减仓</button></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--danger)">PI-01245</td>
+            <td>ETHUSDT</td><td><span class="tag t-short">空</span></td>
+            <td class="mono">390 ETH</td><td class="mono">$1,340,000</td>
+            <td class="mono" style="color:var(--warning)">8x</td>
+            <td class="mono">$3,512</td><td class="mono" style="color:var(--cyan)">$3,438</td>
+            <td class="mono" style="color:var(--danger)">$3,412</td>
+            <td><div style="display:flex;align-items:center;gap:6px"><div class="mr-bar-w"><div class="mr-bar" style="width:91%;background:var(--danger)"></div></div><span class="mono" style="color:var(--danger)">91.8%</span></div></td>
+            <td class="mono" style="color:var(--success)">+$28,860</td>
+            <td><div style="display:flex;gap:2px"><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div></div></td>
+            <td><button class="act-btn btn-red">强制减仓</button></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--warning)">PI-00341</td>
+            <td>BTCUSDT</td><td><span class="tag t-long">多</span></td>
+            <td class="mono">108.5 BTC</td><td class="mono">$7,100,000</td>
+            <td class="mono">15x</td>
+            <td class="mono">$58,200</td><td class="mono" style="color:var(--cyan)">$67,241</td>
+            <td class="mono" style="color:var(--warning)">$59,880</td>
+            <td><div style="display:flex;align-items:center;gap:6px"><div class="mr-bar-w"><div class="mr-bar" style="width:88%;background:var(--warning)"></div></div><span class="mono" style="color:var(--warning)">88.5%</span></div></td>
+            <td class="mono" style="color:var(--success)">+$979,285</td>
+            <td><div style="display:flex;gap:2px"><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--border)"></div></div></td>
+            <td><button class="act-btn btn-warn">发送预警</button></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--warning)">PI-02133</td>
+            <td>BTCUSDT</td><td><span class="tag t-short">空</span></td>
+            <td class="mono">48.0 BTC</td><td class="mono">$3,200,000</td>
+            <td class="mono">10x</td>
+            <td class="mono">$69,500</td><td class="mono" style="color:var(--cyan)">$67,241</td>
+            <td class="mono" style="color:var(--warning)">$67,100</td>
+            <td><div style="display:flex;align-items:center;gap:6px"><div class="mr-bar-w"><div class="mr-bar" style="width:82%;background:var(--warning)"></div></div><span class="mono" style="color:var(--warning)">82.3%</span></div></td>
+            <td class="mono" style="color:var(--success)">+$108,384</td>
+            <td><div style="display:flex;gap:2px"><div style="width:9px;height:9px;border-radius:2px;background:var(--warning)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--warning)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--warning)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--border)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--border)"></div></div></td>
+            <td><button class="act-btn btn-warn">发送预警</button></td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:var(--t2)">PI-00567</td>
+            <td>SOLUSDT</td><td><span class="tag t-long">多</span></td>
+            <td class="mono">6,280 SOL</td><td class="mono">$890,000</td>
+            <td class="mono">12x</td>
+            <td class="mono">$128.5</td><td class="mono" style="color:var(--cyan)">$141.7</td>
+            <td class="mono" style="color:var(--warning)">$141.2</td>
+            <td><div style="display:flex;align-items:center;gap:6px"><div class="mr-bar-w"><div class="mr-bar" style="width:85%;background:var(--warning)"></div></div><span class="mono" style="color:var(--warning)">85.1%</span></div></td>
+            <td class="mono" style="color:var(--success)">+$82,936</td>
+            <td><div style="display:flex;gap:2px"><div style="width:9px;height:9px;border-radius:2px;background:var(--warning)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--warning)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--warning)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--border)"></div><div style="width:9px;height:9px;border-radius:2px;background:var(--border)"></div></div></td>
+            <td><button class="act-btn btn-warn">发送预警</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RISK EVENT LOG -->
+    <div class="card">
+      <div class="card-hd"><div class="card-title">风控事件日志</div><div class="card-sub">过去2小时</div></div>
+      <div class="card-bd">
+        <div class="ev-item"><div class="ev-dot" style="background:var(--danger)"></div><div class="ev-time">14:28:41</div><div class="ev-msg">账户 <strong>PI-00892</strong> 保证金比率突破 <strong style="color:var(--danger)">90%</strong> 红线，系统已发送实时预警短信+App推送</div></div>
+        <div class="ev-item"><div class="ev-dot" style="background:var(--warning)"></div><div class="ev-time">14:15:03</div><div class="ev-msg">账户 <strong>PI-01245</strong> 保证金比率达到 <strong style="color:var(--warning)">88.2%</strong>，进入预警区</div></div>
+        <div class="ev-item"><div class="ev-dot" style="background:var(--danger)"></div><div class="ev-time">13:52:17</div><div class="ev-msg">强制平仓触发：账户 <strong>PI-03182</strong> ETHUSDT多仓，名义价值 <strong>$240,000</strong>，保证金比率已达100%</div></div>
+        <div class="ev-item"><div class="ev-dot" style="background:var(--success)"></div><div class="ev-time">13:48:55</div><div class="ev-msg">账户 <strong>PI-00341</strong> 主动追加保证金 <strong style="color:var(--success)">+$50,000 USDT</strong>，保证金比率从 93.1% 降至 88.5%</div></div>
+        <div class="ev-item"><div class="ev-dot" style="background:var(--indigo)"></div><div class="ev-time">13:31:22</div><div class="ev-msg">系统自动检测：Bybit现货价格源 <strong>延迟 &gt; 3秒</strong>，临时降权处理，权重从 11.3% 降至 0%</div></div>
+        <div class="ev-item"><div class="ev-dot" style="background:var(--success)"></div><div class="ev-time">13:30:08</div><div class="ev-msg">Bybit现货价格源 <strong>恢复正常</strong>，权重已恢复至 11.3%</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+<script>
+function updateClock(){const now=new Date();const t=now.toLocaleTimeString('zh-CN',{hour12:false,timeZone:'Asia/Hong_Kong'});document.getElementById('clock').textContent='HKT '+t}
+updateClock();setInterval(updateClock,1000);
+const labels=Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`);
+new Chart(document.getElementById('mrTrend').getContext('2d'),{type:'line',data:{labels,datasets:[{label:'最大比率',data:[45,48,52,55,60,63,58,54,51,56,62,68,72,76,80,78,82,86,88,91,94,94,94,94],borderColor:'#FF4757',backgroundColor:'rgba(255,71,87,0.05)',tension:0.4,fill:true,pointRadius:0,borderWidth:2},{label:'平均比率',data:[22,23,25,26,28,30,28,26,25,27,30,33,35,37,40,38,41,43,44,45,46,46,46,46],borderColor:'#00C6E0',backgroundColor:'rgba(0,198,224,0.05)',tension:0.4,fill:true,pointRadius:0,borderWidth:2},{label:'P90比率',data:[38,40,43,45,49,52,48,45,43,46,52,57,61,65,70,68,72,76,79,83,86,86,86,86],borderColor:'#FFB300',backgroundColor:'rgba(255,179,0,0.05)',tension:0.4,fill:false,pointRadius:0,borderWidth:1.5,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#6B85A2',font:{size:11},boxWidth:12}},tooltip:{backgroundColor:'#132035',titleColor:'#DDE6F0',bodyColor:'#6B85A2',borderColor:'#1A2B42',borderWidth:1}},scales:{x:{grid:{color:'rgba(26,43,66,0.6)'},ticks:{color:'#6B85A2',font:{size:9.5},maxTicksLimit:8}},y:{grid:{color:'rgba(26,43,66,0.6)'},ticks:{color:'#6B85A2',font:{size:9.5},callback:v=>v+'%'},max:100}}}});
+</script>
+</body>
+</html>

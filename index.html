@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BitV Admin 后台原型 · 设计汇报</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060C18;--surface:#0B1220;--card:#0F1A2E;--card2:#132035;
+  --border:#1A2B42;--border2:#243650;
+  --cyan:#00C6E0;--cyan-a:rgba(0,198,224,.1);
+  --indigo:#7C78EE;--indigo-a:rgba(124,120,238,.1);
+  --success:#00D4A0;--success-a:rgba(0,212,160,.1);
+  --warning:#FFB300;--warning-a:rgba(255,179,0,.1);
+  --danger:#FF4757;
+  --t1:#DDE6F0;--t2:#6B85A2;--t3:#384C64;
+  --font-sans:'Plus Jakarta Sans','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-mono:'Space Mono','Courier New',monospace;
+  --font-display:'Syne','PingFang SC',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:var(--font-sans);min-height:100vh}
+
+/* ── Hero ── */
+.hero{padding:72px 0 56px;text-align:center;position:relative;overflow:hidden}
+.hero::before{
+  content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,198,224,.08) 0%,transparent 70%);
+  pointer-events:none
+}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;border:1px solid rgba(0,198,224,.3);background:var(--cyan-a);font-size:11px;font-weight:600;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:28px}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:var(--font-display);font-size:52px;font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:16px;background:linear-gradient(135deg,#DDE6F0 30%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:15px;color:var(--t2);max-width:540px;margin:0 auto 36px;line-height:1.7}
+.hero-badges{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:.5px}
+.badge-cyan{background:var(--cyan-a);color:var(--cyan);border:1px solid rgba(0,198,224,.25)}
+.badge-indigo{background:var(--indigo-a);color:var(--indigo);border:1px solid rgba(124,120,238,.25)}
+.badge-success{background:var(--success-a);color:var(--success);border:1px solid rgba(0,212,160,.25)}
+.badge-warn{background:var(--warning-a);color:var(--warning);border:1px solid rgba(255,179,0,.25)}
+
+/* ── Container ── */
+.container{max-width:1100px;margin:0 auto;padding:0 32px}
+
+/* ── Section header ── */
+.section-header{text-align:center;margin-bottom:36px}
+.section-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.section-title{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--t1)}
+
+/* ── Module cards grid ── */
+.modules{padding:0 0 80px}
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.module-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;text-decoration:none;display:flex;flex-direction:column;gap:0;transition:all .2s;position:relative;overflow:hidden;cursor:pointer}
+.module-card::before{content:'';position:absolute;inset:0;opacity:0;transition:.2s;pointer-events:none}
+.module-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.module-card:hover::before{opacity:1}
+.module-card.cyan:hover{border-color:rgba(0,198,224,.4);box-shadow:0 12px 40px rgba(0,198,224,.08)}
+.module-card.indigo:hover{border-color:rgba(124,120,238,.4);box-shadow:0 12px 40px rgba(124,120,238,.08)}
+.module-card.success:hover{border-color:rgba(0,212,160,.4);box-shadow:0 12px 40px rgba(0,212,160,.08)}
+.module-card.warning:hover{border-color:rgba(255,179,0,.4);box-shadow:0 12px 40px rgba(255,179,0,.08)}
+.module-card.danger:hover{border-color:rgba(255,71,87,.4);box-shadow:0 12px 40px rgba(255,71,87,.08)}
+
+.card-num{font-family:var(--font-mono);font-size:11px;color:var(--t3);margin-bottom:16px;letter-spacing:1px}
+.card-icon-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.card-icon.cyan{background:var(--cyan-a)}
+.card-icon.indigo{background:var(--indigo-a)}
+.card-icon.success{background:var(--success-a)}
+.card-icon.warning{background:var(--warning-a)}
+.card-icon.danger{background:rgba(255,71,87,.1)}
+.card-arrow{font-size:18px;color:var(--t3);transition:.2s;margin-top:4px}
+.module-card:hover .card-arrow{color:var(--cyan);transform:translateX(3px)}
+.card-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--t1);margin-bottom:6px;line-height:1.2}
+.card-en{font-size:10px;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px}
+.card-desc{font-size:12.5px;color:var(--t2);line-height:1.65;flex:1}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.card-tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.tag-cyan{background:var(--cyan-a);color:var(--cyan)}
+.tag-indigo{background:var(--indigo-a);color:var(--indigo)}
+.tag-success{background:var(--success-a);color:var(--success)}
+.tag-warn{background:var(--warning-a);color:var(--warning)}
+.tag-danger{background:rgba(255,71,87,.1);color:var(--danger)}
+.tag-sfc{background:var(--cyan-a);color:var(--cyan);font-size:9px;letter-spacing:.8px}
+
+/* ── Divider ── */
+.divider{border:none;border-top:1px solid var(--border);margin:0 0 60px}
+
+/* ── Design system strip ── */
+.design-strip{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 36px;margin-bottom:60px}
+.design-strip-title{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--t2);letter-spacing:1px;text-transform:uppercase;margin-bottom:24px}
+.design-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.ds-item{display:flex;flex-direction:column;gap:8px}
+.ds-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
+.ds-colors{display:flex;gap:4px}
+.ds-swatch{width:24px;height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.06)}
+.ds-font{font-size:13px;color:var(--t1);line-height:1.4}
+.ds-font-sub{font-size:10px;color:var(--t3)}
+
+/* ── Footer ── */
+footer{padding:32px;text-align:center;border-top:1px solid var(--border);font-size:11px;color:var(--t3);line-height:2}
+footer a{color:var(--t2);text-decoration:none}
+footer a:hover{color:var(--cyan)}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span class="hero-dot"></span>
+      DESIGN PROTOTYPE · PHASE 2 REVIEW
+    </div>
+    <h1>BitV 后台管理<br>系统原型</h1>
+    <p class="hero-sub">Hong Kong VATP 永续合约交易平台 · 后台运营系统 UI 原型设计方案<br>基于 SFC ASPIRe PillarP 合规要求深度梳理，覆盖完整风险管理链路</p>
+    <div class="hero-badges">
+      <span class="badge badge-cyan">⬡ SFC VATP Licensed</span>
+      <span class="badge badge-indigo">◎ Professional Investor Only</span>
+      <span class="badge badge-success">▲ USDT Perpetual Futures</span>
+      <span class="badge badge-warn">⚑ ASPIRe PillarP Compliant</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modules -->
+<div class="modules">
+  <div class="container">
+
+    <div class="section-header">
+      <div class="section-label">后台模块导航</div>
+      <div class="section-title">8 个功能模块原型页面</div>
+    </div>
+
+    <div class="modules-grid">
+
+      <!-- 01 总控台 -->
+      <a class="module-card cyan" href="01_总控台.html">
+        <div class="card-num">MODULE 01</div>
+        <div class="card-icon-row">
+          <div class="card-icon cyan">⬡</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">总控台</div>
+        <div class="card-en">Main Dashboard</div>
+        <div class="card-desc">全平台实时概览：KPI 指标卡、保证金率分布图、高危账户预警表、ADL Top-5 指示器、系统模块健康状态、资金费率倒计时。</div>
+        <div class="card-tags">
+          <span class="card-tag tag-cyan">实时监控</span>
+          <span class="card-tag tag-sfc">SFC 披露</span>
+          <span class="card-tag tag-indigo">Chart.js</span>
+        </div>
+      </a>
+
+      <!-- 02 用户管理 -->
+      <a class="module-card indigo" href="02_用户管理.html">
+        <div class="card-num">MODULE 02</div>
+        <div class="card-icon-row">
+          <div class="card-icon indigo">◎</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">用户管理 / PI 审核</div>
+        <div class="card-en">User Management · PI Verification</div>
+        <div class="card-desc">专业投资者（PI）资质审批队列（个人组合 ≥ HKD 800万），KYC 状态追踪，用户账户管理，SFC 合规档案维护。</div>
+        <div class="card-tags">
+          <span class="card-tag tag-sfc">SFC PI 门槛</span>
+          <span class="card-tag tag-indigo">KYC-3</span>
+          <span class="card-tag tag-warn">审批流</span>
+        </div>
+      </a>
+
+      <!-- 03 风控监控 -->
+      <a class="module-card danger" href="03_风控监控.html">
+        <div class="card-num">MODULE 03</div>
+        <div class="card-icon-row">
+          <div class="card-icon danger">◈</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">风控监控</div>
+        <div class="card-en">Risk Control Monitor</div>
+        <div class="card-desc">24H 保证金率趋势图（max/avg/P90 三线）、指数价格来源偏差监控（8 交易所权重）、高危仓位明细、风险事件日志。</div>
+        <div class="card-tags">
+          <span class="card-tag tag-danger">实时风险</span>
+          <span class="card-tag tag-indigo">标记价格</span>
+          <span class="card-tag tag-cyan">指数监控</span>
+        </div>
+      </a>
+
+      <!-- 04 强平管理 -->
+      <a class="module-card warning" href="04_强平管理.html">
+        <div class="card-num">MODULE 04</div>
+        <div class="card-icon-row">
+          <div class="card-icon warning">▽</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">强制平仓管理</div>
+        <div class="card-en">Liquidation Management</div>
+        <div class="card-desc">SFC 第 19 条五层强平瀑布流程（订单簿→备用流动性→保险基金→ADL→最终兜底），7 日强平量图表，历史记录。</div>
+        <div class="card-tags">
+          <span class="card-tag tag-sfc">SFC 第19条</span>
+          <span class="card-tag tag-warn">5层瀑布</span>
+          <span class="card-tag tag-danger">1.25% 清算费</span>
+        </div>
+      </a>
+
+      <!-- 05 保险基金 -->
+      <a class="module-card success" href="05_保险基金.html">
+        <div class="card-num">MODULE 05</div>
+        <div class="card-icon-row">
+          <div class="card-icon success">◉</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">保险基金</div>
+        <div class="card-en">Insurance Fund</div>
+        <div class="card-desc">SFC 强制实时披露余额（$45.2M），三池分布，30 日趋势图，合规清单，近期资金流水，压力测试结果（99.9% 置信度）。</div>
+        <div class="card-tags">
+          <span class="card-tag tag-sfc">强制公开披露</span>
+          <span class="card-tag tag-success">$45.2M</span>
+          <span class="card-tag tag-indigo">压力测试</span>
+        </div>
+      </a>
+
+      <!-- 06 ADL系统 -->
+      <a class="module-card indigo" href="06_ADL系统.html">
+        <div class="card-num">MODULE 06</div>
+        <div class="card-icon-row">
+          <div class="card-icon indigo">⇅</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">ADL 系统</div>
+        <div class="card-en">Auto-Deleveraging System</div>
+        <div class="card-desc">ADL 排名公式展示（PNL% × 有效杠杆），5 灯指示器，排名表，SFC 要求 24 小时强制事后报告管理与归档系统。</div>
+        <div class="card-tags">
+          <span class="card-tag tag-sfc">24H 事后报告</span>
+          <span class="card-tag tag-indigo">ADL 排名</span>
+          <span class="card-tag tag-danger">强减仓</span>
+        </div>
+      </a>
+
+      <!-- 07 合约配置 -->
+      <a class="module-card cyan" href="07_合约配置.html">
+        <div class="card-num">MODULE 07</div>
+        <div class="card-icon-row">
+          <div class="card-icon cyan">⊞</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">合约配置</div>
+        <div class="card-en">Contract Parameter Management</div>
+        <div class="card-desc">合约列表管理，阶梯保证金档位（7级），交易参数精细配置，风控参数，资金费率参数，CRO+CO 双人授权变更，审计日志（7年存档）。</div>
+        <div class="card-tags">
+          <span class="card-tag tag-sfc">双人授权</span>
+          <span class="card-tag tag-cyan">阶梯保证金</span>
+          <span class="card-tag tag-warn">审计日志</span>
+        </div>
+      </a>
+
+      <!-- 08 资金费率 -->
+      <a class="module-card success" href="08_资金费率.html">
+        <div class="card-num">MODULE 08</div>
+        <div class="card-icon-row">
+          <div class="card-icon success">↻</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">资金费率监控</div>
+        <div class="card-en">Funding Rate Monitor</div>
+        <div class="card-desc">实时倒计时（UTC 00/08/16 三次结算），费率分量拆解（溢价指数 TWAP + 固定利率），30 日历史柱状图，跨所费率横向对比。</div>
+        <div class="card-tags">
+          <span class="card-tag tag-sfc">SFC 实时披露</span>
+          <span class="card-tag tag-success">8H 结算</span>
+          <span class="card-tag tag-indigo">±0.3% Cap</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<!-- Design System Reference -->
+<div class="container">
+  <hr class="divider">
+  <div class="design-strip">
+    <div class="design-strip-title">设计规范参考</div>
+    <div class="design-grid">
+      <div class="ds-item">
+        <div class="ds-label">主色板</div>
+        <div class="ds-colors">
+          <div class="ds-swatch" style="background:#060C18" title="--bg"></div>
+          <div class="ds-swatch" style="background:#0B1220" title="--surface"></div>
+          <div class="ds-swatch" style="background:#0F1A2E" title="--card"></div>
+          <div class="ds-swatch" style="background:#00C6E0" title="--cyan"></div>
+          <div class="ds-swatch" style="background:#7C78EE" title="--indigo"></div>
+          <div class="ds-swatch" style="background:#00D4A0" title="--success"></div>
+        </div>
+      </div>
+      <div class="ds-item">
+        <div class="ds-label">状态色</div>
+        <div class="ds-colors">
+          <div class="ds-swatch" style="background:#FFB300" title="--warning"></div>
+          <div class="ds-swatch" style="background:#FF4757" title="--danger"></div>
+          <div class="ds-swatch" style="background:#1A2B42" title="--border"></div>
+          <div class="ds-swatch" style="background:#DDE6F0" title="--t1"></div>
+          <div class="ds-swatch" style="background:#6B85A2" title="--t2"></div>
+          <div class="ds-swatch" style="background:#384C64" title="--t3"></div>
+        </div>
+      </div>
+      <div class="ds-item">
+        <div class="ds-label">Display 字体</div>
+        <div class="ds-font" style="font-family:'Syne',sans-serif;font-weight:700">Syne Bold</div>
+        <div class="ds-font-sub">标题 / Logo / KPI 大字</div>
+      </div>
+      <div class="ds-item">
+        <div class="ds-label">正文字体</div>
+        <div class="ds-font" style="font-family:'Plus Jakarta Sans',sans-serif">Plus Jakarta Sans</div>
+        <div class="ds-font-sub">正文 / 说明 / 按钮</div>
+      </div>
+      <div class="ds-item">
+        <div class="ds-label">数字字体</div>
+        <div class="ds-font" style="font-family:'Space Mono',monospace;font-size:12px">Space Mono</div>
+        <div class="ds-font-sub">价格 / 数值 / 代码</div>
+      </div>
+      <div class="ds-item">
+        <div class="ds-label">图表库</div>
+        <div class="ds-font">Chart.js 4.4</div>
+        <div class="ds-font-sub">折线 / 柱状 / 实时数据</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>BitV Admin 后台原型 · Phase 2 设计汇报 · 2026-03</div>
+  <div>Hong Kong SFC VATP · ASPIRe PillarP · Professional Investor Only</div>
+  <div style="margin-top:8px;font-size:10px">本原型仅供内部评审使用，不构成正式产品交付物</div>
+</footer>
+
+</body>
+</html>

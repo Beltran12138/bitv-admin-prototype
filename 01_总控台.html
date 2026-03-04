@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>BitV Admin · 总控台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060C18;--surface:#0B1220;--card:#0F1A2E;--card2:#132035;
+  --border:#1A2B42;--border2:#243650;
+  --cyan:#00C6E0;--cyan2:#00E5FF;--cyan-a:rgba(0,198,224,0.12);
+  --indigo:#7C78EE;--indigo-a:rgba(124,120,238,0.12);
+  --success:#00D4A0;--success-a:rgba(0,212,160,0.12);
+  --warning:#FFB300;--warning-a:rgba(255,179,0,0.12);
+  --danger:#FF4757;--danger-a:rgba(255,71,87,0.12);
+  --t1:#DDE6F0;--t2:#6B85A2;--t3:#384C64;
+  --font-sans:'Plus Jakarta Sans','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-mono:'Space Mono','Courier New',monospace;
+  --font-display:'Syne','PingFang SC',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--font-sans);font-size:14px;line-height:1.5;overflow:hidden}
+.shell{display:grid;grid-template-columns:224px 1fr;height:100vh}
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--cyan),var(--indigo));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:15px;font-weight:800;color:#fff;flex-shrink:0}
+.logo-text{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--t1);letter-spacing:-0.5px}
+.logo-sub{font-size:9.5px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase}
+.nav-section{padding:14px 12px 4px}
+.nav-label{font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);padding:0 8px;margin-bottom:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;color:var(--t2);font-size:13px;font-weight:500;transition:all .15s;text-decoration:none;margin-bottom:1px}
+.nav-item:hover{background:var(--card);color:var(--t1)}
+.nav-item.active{background:var(--cyan-a);color:var(--cyan);border:1px solid rgba(0,198,224,0.2)}
+.nav-icon{width:15px;height:15px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px}
+.nav-badge.w{background:var(--warning);color:#000}
+.sidebar-footer{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
+.sys-status{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;background:var(--success-a);border:1px solid rgba(0,212,160,0.2)}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,160,0.6)}50%{box-shadow:0 0 0 4px rgba(0,212,160,0)}}
+.sys-label{font-size:11.5px;font-weight:600;color:var(--success)}
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.page-title{font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--t1);letter-spacing:-0.5px;margin-right:auto}
+.page-title span{color:var(--t3);font-size:12.5px;font-weight:500;margin-left:8px}
+.topbar-time{font-family:var(--font-mono);font-size:12.5px;color:var(--t2);background:var(--card);padding:5px 12px;border-radius:6px;border:1px solid var(--border)}
+.topbar-btn{width:34px;height:34px;border-radius:7px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);position:relative}
+.notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--danger);border:1px solid var(--surface)}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:4px 12px 4px 4px;cursor:pointer}
+.user-avatar{width:26px;height:26px;border-radius:5px;background:linear-gradient(135deg,var(--cyan),var(--indigo));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.user-name{font-size:12px;font-weight:600;color:var(--t1)}
+.user-role{font-size:10px;color:var(--t2)}
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:22px 28px;display:flex;flex-direction:column;gap:18px}
+.alert-banner{display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--warning-a);border:1px solid rgba(255,179,0,0.3);border-radius:9px;color:var(--warning);font-size:13px;font-weight:500}
+.alert-dismiss{margin-left:auto;font-size:12px;opacity:.7;cursor:pointer}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:13px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 14px}
+.kpi-card.risk{border-color:rgba(255,71,87,0.3);background:linear-gradient(160deg,var(--card) 60%,var(--danger-a))}
+.kpi-card.warn{border-color:rgba(255,179,0,0.3);background:linear-gradient(160deg,var(--card) 60%,var(--warning-a))}
+.kpi-card.sfc{border-color:rgba(0,198,224,0.25);background:linear-gradient(160deg,var(--card) 60%,var(--cyan-a))}
+.kpi-label{font-size:10.5px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.sfc-tag{font-size:9px;padding:1px 5px;border-radius:3px;background:var(--cyan-a);color:var(--cyan);border:1px solid rgba(0,198,224,0.2);letter-spacing:0;text-transform:none}
+.kpi-value{font-family:var(--font-mono);font-size:21px;font-weight:700;color:var(--t1);line-height:1.2;margin-bottom:5px}
+.kpi-value.c-danger{color:var(--danger)}.kpi-value.c-warn{color:var(--warning)}.kpi-value.c-cyan{color:var(--cyan)}.kpi-value.c-ok{color:var(--success)}
+.kpi-delta{font-size:11px;color:var(--t2)}
+.up{color:var(--success)}.down{color:var(--danger)}
+/* GRID ROWS */
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:13px}
+.row3{display:grid;grid-template-columns:3fr 2fr;gap:13px}
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+.card-hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.card-title{font-size:13px;font-weight:700;color:var(--t1);margin-right:auto}
+.card-sub{font-size:11px;color:var(--t2)}
+.card-link{font-size:11px;color:var(--cyan);text-decoration:none}
+.card-bd{padding:16px 18px}
+/* STATUS LIST */
+.st-list{display:flex;flex-direction:column;gap:6px}
+.st-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:7px;background:var(--surface);border:1px solid var(--border)}
+.st-name{font-size:12.5px;color:var(--t1);font-weight:500;display:flex;align-items:center;gap:7px}
+.dot{width:6px;height:6px;border-radius:50%}
+.d-ok{background:var(--success)}.d-warn{background:var(--warning)}.d-err{background:var(--danger)}.d-blue{background:var(--indigo)}
+.badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:4px}
+.b-ok{background:var(--success-a);color:var(--success)}.b-warn{background:var(--warning-a);color:var(--warning)}.b-err{background:var(--danger-a);color:var(--danger)}.b-info{background:var(--indigo-a);color:var(--indigo)}
+/* TABLE */
+.dt{width:100%;border-collapse:collapse;font-size:12.5px}
+.dt th{text-align:left;padding:7px 11px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--border);white-space:nowrap}
+.dt td{padding:9px 11px;color:var(--t1);border-bottom:1px solid rgba(26,43,66,0.5);vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:var(--card2)}
+.mono{font-family:var(--font-mono);font-size:12px}
+.mr-bar-w{width:72px;height:4px;background:var(--border);border-radius:99px;overflow:hidden;flex-shrink:0}
+.mr-bar{height:100%;border-radius:99px}
+.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:3px;font-size:10.5px;font-weight:700}
+.t-long{background:rgba(0,212,160,0.15);color:var(--success)}.t-short{background:var(--danger-a);color:var(--danger)}
+.act-btn{font-size:10.5px;padding:3px 8px;border-radius:4px;cursor:pointer;border:1px solid;font-family:var(--font-sans)}
+.btn-red{background:var(--danger-a);color:var(--danger);border-color:rgba(255,71,87,0.3)}
+.btn-warn{background:var(--warning-a);color:var(--warning);border-color:rgba(255,179,0,0.3)}
+/* ADL */
+.adl-row{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:7px;background:var(--surface);border:1px solid var(--border);margin-bottom:5px}
+.adl-lights{display:flex;gap:3px;flex-shrink:0}
+.adl-light{width:10px;height:10px;border-radius:2px;background:var(--border)}
+.adl-light.lit{background:var(--danger);box-shadow:0 0 5px var(--danger)}
+.adl-uid{font-family:var(--font-mono);font-size:11.5px;color:var(--t2);flex:1}
+.adl-score{font-family:var(--font-mono);font-size:12px;font-weight:700}
+/* STATUS BAR */
+.sb-item{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:13px 16px;display:flex;align-items:center;gap:12px}
+.sb-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-label{font-size:11px;color:var(--t2);margin-bottom:2px}
+.sb-val{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--t1)}
+.chart-wrap{position:relative;height:175px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+</style>
+</head>
+<body>
+<div class="shell">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">B</div>
+    <div><div class="logo-text">BitV Admin</div><div class="logo-sub">VATP · HK SFC</div></div>
+  </div>
+  <nav class="nav-section">
+    <div class="nav-label">总览</div>
+    <a class="nav-item active" href="01_总控台.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+      总控台
+    </a>
+  </nav>
+  <nav class="nav-section">
+    <div class="nav-label">用户</div>
+    <a class="nav-item" href="02_用户管理.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5m4.5 2v4m-2-2h4"/></svg>
+      用户管理 / PI审核 <span class="nav-badge w">12</span>
+    </a>
+  </nav>
+  <nav class="nav-section">
+    <div class="nav-label">风控</div>
+    <a class="nav-item" href="03_风控监控.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5L2 4v5c0 3 2.5 5 6 6 3.5-1 6-3 6-6V4L8 1.5z"/></svg>
+      风控实时监控 <span class="nav-badge">7</span>
+    </a>
+    <a class="nav-item" href="04_强平管理.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v6l3 3"/><circle cx="8" cy="8" r="6"/></svg>
+      强平管理
+    </a>
+  </nav>
+  <nav class="nav-section">
+    <div class="nav-label">SFC 合规</div>
+    <a class="nav-item" href="05_保险基金.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M5 4V3a3 3 0 016 0v1"/></svg>
+      保险基金
+    </a>
+    <a class="nav-item" href="06_ADL系统.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10L6 6l3 3 5-6"/></svg>
+      ADL系统 <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="#">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h7M3 12h5"/></svg>
+      合规报告
+    </a>
+  </nav>
+  <nav class="nav-section">
+    <div class="nav-label">配置</div>
+    <a class="nav-item" href="07_合约配置.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5"/></svg>
+      合约参数配置
+    </a>
+    <a class="nav-item" href="08_资金费率.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
+      资金费率
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sys-status">
+      <div class="pulse"></div>
+      <div>
+        <div class="sys-label">系统运行正常</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:1px">所有模块在线 · 延迟 <span style="font-family:var(--font-mono)">12ms</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title">总控台 <span>实时风控概览</span></div>
+    <div class="topbar-time" id="clock">HKT --:--:--</div>
+    <div class="topbar-btn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1C3.7 1 1 3.7 1 7s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6z"/><path d="M7 4v3l2 1.5"/></svg><div class="notif-dot"></div></div>
+    <div class="user-chip">
+      <div class="user-avatar">赵</div>
+      <div><div class="user-name">赵 Admin</div><div class="user-role">超级管理员</div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ALERT -->
+    <div class="alert-banner">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7.5 1.5L1 13h13L7.5 1.5z"/><path d="M7.5 6v2.5M7.5 10.5v.5"/></svg>
+      <span><strong>风险预警：</strong>当前有 <strong>3</strong> 个账户保证金比率超过 <strong>90%</strong>，请立即复查。另有 <strong>12</strong> 名PI申请人待审核（平均等待2.3天）。</span>
+      <span class="alert-dismiss">× 忽略</span>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">活跃持仓账户</div><div class="kpi-value">156</div><div class="kpi-delta"><span class="up">▲ 3</span> 较昨日</div></div>
+      <div class="kpi-card"><div class="kpi-label">全市场名义持仓量</div><div class="kpi-value">$2.41B</div><div class="kpi-delta"><span class="up">▲ 4.2%</span> 24H变化</div></div>
+      <div class="kpi-card sfc"><div class="kpi-label">保险基金余额 <span class="sfc-tag">SFC强制</span></div><div class="kpi-value c-cyan">$45.2M</div><div class="kpi-delta">最低储备: <span style="color:var(--success)">$12M ✓</span></div></div>
+      <div class="kpi-card"><div class="kpi-label">当前BTC资金费率</div><div class="kpi-value c-ok">+0.0100%</div><div class="kpi-delta" id="fr-cd" style="font-family:var(--font-mono);font-size:10.5px">结算倒计时...</div></div>
+      <div class="kpi-card risk"><div class="kpi-label">高风险账户</div><div class="kpi-value c-danger">7</div><div class="kpi-delta">保证金比率 <span class="down">&gt;80%</span></div></div>
+      <div class="kpi-card warn"><div class="kpi-label">PI 审核待处理</div><div class="kpi-value c-warn">12</div><div class="kpi-delta">平均等待 <span style="color:var(--warning)">2.3天</span></div></div>
+    </div>
+
+    <!-- ROW 2 -->
+    <div class="row2">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">保证金比率分布</div><div class="card-sub">全部持仓账户 · 实时更新</div></div>
+        <div class="card-bd">
+          <div class="chart-wrap"><canvas id="mrChart"></canvas></div>
+          <div style="display:flex;gap:18px;margin-top:11px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:9px;height:9px;border-radius:2px;background:var(--success)"></div>安全 &lt;80% · <strong style="color:var(--t1)">136账户</strong></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:9px;height:9px;border-radius:2px;background:var(--warning)"></div>预警 80-90% · <strong style="color:var(--t1)">13账户</strong></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:9px;height:9px;border-radius:2px;background:var(--danger)"></div>危险 &gt;90% · <strong style="color:var(--t1)">7账户</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">系统模块状态</div><div class="card-sub">全部在线</div></div>
+        <div class="card-bd">
+          <div class="st-list">
+            <div class="st-item"><div class="st-name"><div class="dot d-ok"></div>指数价格引擎</div><div class="badge b-ok">正常 · 16源</div></div>
+            <div class="st-item"><div class="st-name"><div class="dot d-ok"></div>标记价格计算</div><div class="badge b-ok">正常 · 1s刷新</div></div>
+            <div class="st-item"><div class="st-name"><div class="dot d-ok"></div>撮合引擎</div><div class="badge b-ok">正常 · 12ms</div></div>
+            <div class="st-item"><div class="st-name"><div class="dot d-ok"></div>资金费率引擎</div><div class="badge b-ok">累积中</div></div>
+            <div class="st-item"><div class="st-name"><div class="dot d-ok"></div>强平引擎</div><div class="badge b-ok">待机就绪</div></div>
+            <div class="st-item"><div class="st-name"><div class="dot d-blue"></div>ADL排名系统</div><div class="badge b-info">实时更新</div></div>
+            <div class="st-item"><div class="st-name"><div class="dot d-ok"></div>保险基金模块</div><div class="badge b-ok">余额充足</div></div>
+            <div class="st-item"><div class="st-name"><div class="dot d-ok"></div>SFC合规实时披露</div><div class="badge b-ok">推送中</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3 -->
+    <div class="row3">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">⚠ 高风险仓位预警</div>
+          <div class="card-sub">保证金比率 &gt; 80%</div>
+          <a class="card-link" href="03_风控监控.html" style="margin-left:12px">全部 →</a>
+        </div>
+        <table class="dt">
+          <thead><tr><th>账户ID</th><th>合约</th><th>方向</th><th>名义价值</th><th>保证金比率</th><th>强平价格(预估)</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="color:var(--cyan)">PI-00892</td><td>BTCUSDT永续</td><td><span class="tag t-long">多</span></td><td class="mono">$4,820,000</td><td><div style="display:flex;align-items:center;gap:7px"><div class="mr-bar-w"><div class="mr-bar" style="width:94%;background:var(--danger)"></div></div><span class="mono" style="color:var(--danger)">94.2%</span></div></td><td class="mono" style="color:var(--danger)">$61,240</td><td><button class="act-btn btn-red">强制减仓</button></td></tr>
+            <tr><td class="mono" style="color:var(--cyan)">PI-01245</td><td>ETHUSDT永续</td><td><span class="tag t-short">空</span></td><td class="mono">$1,340,000</td><td><div style="display:flex;align-items:center;gap:7px"><div class="mr-bar-w"><div class="mr-bar" style="width:91%;background:var(--danger)"></div></div><span class="mono" style="color:var(--danger)">91.8%</span></div></td><td class="mono" style="color:var(--danger)">$3,412</td><td><button class="act-btn btn-red">强制减仓</button></td></tr>
+            <tr><td class="mono" style="color:var(--cyan)">PI-00341</td><td>BTCUSDT永续</td><td><span class="tag t-long">多</span></td><td class="mono">$7,100,000</td><td><div style="display:flex;align-items:center;gap:7px"><div class="mr-bar-w"><div class="mr-bar" style="width:88%;background:var(--warning)"></div></div><span class="mono" style="color:var(--warning)">88.5%</span></div></td><td class="mono" style="color:var(--warning)">$59,880</td><td><button class="act-btn btn-warn">发送预警</button></td></tr>
+            <tr><td class="mono" style="color:var(--cyan)">PI-00567</td><td>SOLUSDT永续</td><td><span class="tag t-long">多</span></td><td class="mono">$890,000</td><td><div style="display:flex;align-items:center;gap:7px"><div class="mr-bar-w"><div class="mr-bar" style="width:85%;background:var(--warning)"></div></div><span class="mono" style="color:var(--warning)">85.1%</span></div></td><td class="mono" style="color:var(--warning)">$141.2</td><td><button class="act-btn btn-warn">发送预警</button></td></tr>
+            <tr><td class="mono" style="color:var(--cyan)">PI-02133</td><td>BTCUSDT永续</td><td><span class="tag t-short">空</span></td><td class="mono">$3,200,000</td><td><div style="display:flex;align-items:center;gap:7px"><div class="mr-bar-w"><div class="mr-bar" style="width:82%;background:var(--warning)"></div></div><span class="mono" style="color:var(--warning)">82.3%</span></div></td><td class="mono" style="color:var(--warning)">$67,100</td><td><button class="act-btn btn-warn">发送预警</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><div class="card-title">ADL 风险排名 Top5</div><a class="card-link" href="06_ADL系统.html">全部 →</a></div>
+        <div class="card-bd">
+          <div style="font-size:11px;color:var(--t2);margin-bottom:10px">以下仓位处于ADL高风险区，触发时将优先强制减仓</div>
+          <div class="adl-row"><div class="adl-lights"><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div></div><div><div class="adl-uid">PI-00892 · BTC多 · 10x</div><div style="font-size:10px;color:var(--t3)">PNL% × 有效杠杆</div></div><div class="adl-score" style="color:var(--danger)">3.842</div></div>
+          <div class="adl-row"><div class="adl-lights"><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div></div><div><div class="adl-uid">PI-00124 · ETH空 · 8x</div><div style="font-size:10px;color:var(--t3)">PNL% × 有效杠杆</div></div><div class="adl-score" style="color:var(--danger)">2.910</div></div>
+          <div class="adl-row"><div class="adl-lights"><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light"></div></div><div><div class="adl-uid">PI-02891 · BTC多 · 15x</div><div style="font-size:10px;color:var(--t3)">PNL% × 有效杠杆</div></div><div class="adl-score" style="color:var(--warning)">2.445</div></div>
+          <div class="adl-row"><div class="adl-lights"><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light"></div><div class="adl-light"></div></div><div><div class="adl-uid">PI-01782 · SOL多 · 12x</div><div style="font-size:10px;color:var(--t3)">PNL% × 有效杠杆</div></div><div class="adl-score" style="color:var(--warning)">1.884</div></div>
+          <div class="adl-row"><div class="adl-lights"><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light lit"></div><div class="adl-light"></div><div class="adl-light"></div></div><div><div class="adl-uid">PI-00456 · BTC空 · 10x</div><div style="font-size:10px;color:var(--t3)">PNL% × 有效杠杆</div></div><div class="adl-score" style="color:var(--warning)">1.563</div></div>
+          <div style="margin-top:12px;padding:9px 12px;background:var(--surface);border-radius:7px;border:1px solid var(--border)">
+            <div style="font-size:10.5px;color:var(--t2);margin-bottom:3px">⚠ SFC 第19条要求</div>
+            <div style="font-size:11.5px;color:var(--t1)">ADL触发后须在 <strong>24小时内</strong> 出具书面事后报告</div>
+            <div style="font-size:10.5px;color:var(--t3);margin-top:2px">过去30天 ADL事件：0次</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div class="row4">
+      <div class="sb-item">
+        <div class="sb-icon" style="background:var(--cyan-a)"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="var(--cyan)" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="6.5"/><path d="M8.5 5.5v3l2.5 1.5"/></svg></div>
+        <div><div class="sb-label">下次资金费率结算</div><div class="sb-val" id="fr-cd2" style="color:var(--cyan)">03:24:15</div></div>
+        <div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:var(--t2)">预计费率</div><div style="font-family:var(--font-mono);font-size:13px;color:var(--success);font-weight:700">+0.0100%</div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-icon" style="background:var(--success-a)"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="var(--success)" stroke-width="1.5"><rect x="2" y="5" width="13" height="10" rx="2"/><path d="M6 5V4a2.5 2.5 0 015 0v1"/></svg></div>
+        <div><div class="sb-label">保险基金余额 <span style="font-size:9px;padding:1px 4px;background:var(--cyan-a);color:var(--cyan);border-radius:3px;margin-left:3px">SFC实时</span></div><div class="sb-val" style="color:var(--success)">$45,218,340</div></div>
+        <div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:var(--t2)">最低储备线</div><div style="font-family:var(--font-mono);font-size:13px;color:var(--t1);font-weight:700">$12,000,000</div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-icon" style="background:var(--indigo-a)"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="var(--indigo)" stroke-width="1.5"><path d="M2 13L5 8l4 4 3-5 4 7"/></svg></div>
+        <div><div class="sb-label">24H强平金额</div><div class="sb-val">$2,314,000</div></div>
+        <div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:var(--t2)">强平笔数</div><div style="font-family:var(--font-mono);font-size:13px;color:var(--t1);font-weight:700">14 笔</div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+function updateClock(){const now=new Date();const t=now.toLocaleTimeString('zh-CN',{hour12:false,timeZone:'Asia/Hong_Kong'});document.getElementById('clock').textContent='HKT '+t}
+updateClock();setInterval(updateClock,1000);
+
+let cd=3*3600+24*60+15;
+function tick(){cd--;if(cd<0)cd=8*3600;const h=Math.floor(cd/3600),m=Math.floor(cd%3600/60),s=cd%60;const t=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;const a=document.getElementById('fr-cd'),b=document.getElementById('fr-cd2');if(a)a.textContent='下次结算: '+t;if(b)b.textContent=t}
+tick();setInterval(tick,1000);
+
+new Chart(document.getElementById('mrChart').getContext('2d'),{type:'bar',data:{labels:['0-20%','20-40%','40-60%','60-80%','80-85%','85-90%','90-95%','>95%'],datasets:[{label:'账户数',data:[12,28,47,49,7,6,4,3],backgroundColor:['rgba(0,212,160,0.7)','rgba(0,212,160,0.7)','rgba(0,212,160,0.7)','rgba(0,212,160,0.7)','rgba(255,179,0,0.7)','rgba(255,179,0,0.7)','rgba(255,71,87,0.7)','rgba(255,71,87,0.9)'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#132035',titleColor:'#DDE6F0',bodyColor:'#6B85A2',borderColor:'#1A2B42',borderWidth:1}},scales:{x:{grid:{color:'rgba(26,43,66,0.8)'},ticks:{color:'#6B85A2',font:{size:10}}},y:{grid:{color:'rgba(26,43,66,0.8)'},ticks:{color:'#6B85A2',font:{size:10}}}}}});
+</script>
+</body>
+</html>
