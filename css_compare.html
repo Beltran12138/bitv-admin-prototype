@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CSS 方案对比 — BitV Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box }
+body { background:#E8EDF2; font-family:'Plus Jakarta Sans','PingFang SC',sans-serif; }
+
+.compare-header {
+  text-align:center; padding:24px 0 16px;
+  font-family:'Syne',sans-serif;
+}
+.compare-header h1 { font-size:20px; font-weight:800; color:#1E293B; margin-bottom:4px }
+.compare-header p { font-size:12px; color:#64748B }
+
+.compare-wrap {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  height:calc(100vh - 96px);
+}
+
+.panel { overflow-y:auto; padding:20px; }
+
+.panel-label {
+  text-align:center; font-size:11px; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase;
+  padding:9px; margin-bottom:16px; border-radius:6px;
+}
+
+/* ══════════════════════
+   方案 A — 深色原版
+══════════════════════ */
+.a {
+  --bg:#060C18; --surface:#0B1220; --card:#0F1A2E; --card2:#132035;
+  --border:#1A2B42; --border2:#243650;
+  --accent:#00C6E0; --accent-a:rgba(0,198,224,.12);
+  --success:#00D4A0; --warning:#FFB300; --danger:#FF4757;
+  --t1:#DDE6F0; --t2:#6B85A2; --t3:#384C64;
+  --fs:13px; --fs-sm:11px; --fs-xs:10px;
+  --r:8px;
+  background:var(--bg);
+}
+.a .panel-label { background:#1A2B42; color:#6B85A2 }
+.a .sidebar-mock { background:var(--surface); border-right:1px solid var(--border) }
+
+/* ══════════════════════
+   方案 B — 白色亮色
+══════════════════════ */
+.b {
+  --bg:#F5F7FA; --surface:#FFFFFF; --card:#FFFFFF; --card2:#F8FAFC;
+  --border:#E2E8F0; --border2:#CBD5E1;
+  --accent:#0EA5C9; --accent-a:rgba(14,165,201,.1);
+  --success:#059669; --warning:#D97706; --danger:#DC2626;
+  --t1:#0F172A; --t2:#475569; --t3:#94A3B8;
+  --fs:14px; --fs-sm:12px; --fs-xs:11px;
+  --r:8px;
+  background:var(--bg);
+  border-left:2px solid #CBD5E1;
+}
+.b .panel-label { background:#E2E8F0; color:#475569 }
+.b .sidebar-mock { background:var(--surface); border-right:1px solid var(--border) }
+
+/* ══ 共用组件（CSS变量驱动） ══ */
+
+/* 模拟完整布局框 */
+.layout-mock {
+  display:grid;
+  grid-template-columns:180px 1fr;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:12px;
+  height:380px;
+}
+.sidebar-mock {
+  padding:16px 10px;
+  display:flex; flex-direction:column; gap:2px;
+}
+.sidebar-logo {
+  font-family:'Syne',sans-serif; font-size:15px; font-weight:800;
+  color:var(--accent); padding:0 6px 14px;
+  border-bottom:1px solid var(--border); margin-bottom:10px;
+}
+.sidebar-logo span { display:block; font-size:9px; color:var(--t3); font-family:'Plus Jakarta Sans',sans-serif; font-weight:400; letter-spacing:1px; margin-top:1px }
+.s-section { font-size:9px; color:var(--t3); letter-spacing:1.5px; text-transform:uppercase; padding:8px 8px 4px }
+.s-item {
+  display:flex; align-items:center; gap:7px;
+  padding:7px 8px; border-radius:6px;
+  font-size:var(--fs-sm); font-weight:500; color:var(--t2);
+}
+.s-item.active { background:var(--accent-a); color:var(--accent) }
+
+.main-mock { padding:16px; overflow:hidden; background:var(--bg) }
+.topbar-mock {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+.page-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:var(--t1) }
+.sfc-pill {
+  font-size:9px; font-weight:700; letter-spacing:.8px;
+  padding:3px 8px; border-radius:12px;
+  background:var(--accent-a); color:var(--accent);
+  border:1px solid rgba(14,165,201,.2);
+}
+
+.kpi-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px }
+.kpi-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:10px;
+}
+.kpi-label { font-size:9px; color:var(--t3); text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px }
+.kpi-value { font-family:'Space Mono',monospace; font-size:16px; font-weight:700; color:var(--t1); line-height:1 }
+.kpi-sub { font-size:9px; color:var(--t2); margin-top:3px }
+
+.table-wrap { background:var(--card); border:1px solid var(--border); border-radius:var(--r); overflow:hidden }
+.t-row {
+  display:grid; grid-template-columns:70px 1fr 70px 60px;
+  padding:8px 10px; gap:6px; align-items:center;
+  border-bottom:1px solid var(--border); font-size:var(--fs-sm);
+}
+.t-row:last-child { border-bottom:none }
+.t-row.th {
+  font-size:9px; color:var(--t3); font-weight:600;
+  letter-spacing:.8px; text-transform:uppercase; background:var(--card2);
+}
+.t-row:not(.th) { color:var(--t1) }
+.t-row:not(.th):hover { background:var(--card2) }
+.cell-sub { font-size:9px; color:var(--t2) }
+.mono { font-family:'Space Mono',monospace; font-size:11px }
+
+.tag {
+  display:inline-flex; align-items:center;
+  padding:2px 6px; border-radius:4px;
+  font-size:9px; font-weight:600;
+}
+.tag-ok { background:rgba(5,150,105,.1); color:var(--success); border:1px solid rgba(5,150,105,.2) }
+.tag-warn { background:rgba(217,119,6,.1); color:var(--warning); border:1px solid rgba(217,119,6,.2) }
+.tag-danger { background:rgba(220,38,38,.1); color:var(--danger); border:1px solid rgba(220,38,38,.2) }
+
+/* ── 按钮演示 ── */
+.btn-row { display:flex; gap:8px; margin-bottom:12px }
+.btn {
+  padding:7px 14px; border-radius:var(--r);
+  font-size:var(--fs-sm); font-weight:600; cursor:pointer; border:none;
+}
+.btn-primary { background:var(--accent); color:#fff }
+.btn-ghost { background:transparent; color:var(--t2); border:1px solid var(--border2) }
+.btn-danger-soft { background:rgba(220,38,38,.08); color:var(--danger); border:1px solid rgba(220,38,38,.2) }
+
+/* ── 操作流程步骤演示 ── */
+.step-flow {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px; margin-bottom:12px;
+}
+.step-row { display:flex; align-items:center; gap:0; margin-bottom:12px }
+.step { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1 }
+.step-dot {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700;
+}
+.step-dot.done { background:var(--accent); color:#fff }
+.step-dot.active { background:var(--accent-a); color:var(--accent); border:2px solid var(--accent) }
+.step-dot.pending { background:var(--card2); color:var(--t3); border:1px solid var(--border) }
+.step-label { font-size:9px; color:var(--t2); text-align:center; line-height:1.3 }
+.step-line { height:2px; flex:0.5; background:var(--border); align-self:flex-start; margin-top:14px }
+.step-line.done { background:var(--accent) }
+
+.diff-row {
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:0;
+  border:1px solid var(--border); border-radius:6px; overflow:hidden;
+  margin-bottom:10px; font-size:var(--fs-xs);
+}
+.diff-cell { padding:7px 10px; border-right:1px solid var(--border) }
+.diff-cell:last-child { border-right:none }
+.diff-cell.head { background:var(--card2); font-size:9px; color:var(--t3); font-weight:700; letter-spacing:.6px; text-transform:uppercase }
+.diff-cell.old { color:var(--danger); background:rgba(220,38,38,.04) }
+.diff-cell.new { color:var(--success); background:rgba(5,150,105,.04) }
+.diff-cell.param { color:var(--t2) }
+</style>
+</head>
+<body>
+
+<div class="compare-header">
+  <h1>CSS 方案对比</h1>
+  <p>左侧：深色原版 &nbsp;|&nbsp; 右侧：白色亮色方案 &nbsp;|&nbsp; 告诉我选哪个，我批量更新全部页面</p>
+</div>
+
+<div class="compare-wrap">
+
+  <!-- ══════ 方案 A：深色原版 ══════ -->
+  <div class="panel a">
+    <div class="panel-label">方案 A — 深色原版</div>
+
+    <!-- 完整布局预览 -->
+    <div class="layout-mock">
+      <div class="sidebar-mock">
+        <div class="sidebar-logo">BitV<span>VATP ADMIN</span></div>
+        <div class="s-section">监控</div>
+        <div class="s-item active">⬡ 总控台</div>
+        <div class="s-section">风险</div>
+        <div class="s-item">◈ 风控监控</div>
+        <div class="s-item">▽ 强平管理</div>
+        <div class="s-item">◉ 保险基金</div>
+        <div class="s-section">配置</div>
+        <div class="s-item">⊞ 合约配置</div>
+        <div class="s-item">↻ 资金费率</div>
+      </div>
+      <div class="main-mock">
+        <div class="topbar-mock">
+          <div class="page-title">总控台</div>
+          <span class="sfc-pill">⬡ SFC LIVE</span>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-label">活跃账户</div>
+            <div class="kpi-value">2,841</div>
+            <div class="kpi-sub">↑12 较昨日</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">保险基金</div>
+            <div class="kpi-value" style="color:var(--success)">$45.2M</div>
+            <div class="kpi-sub">储备充足</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">高危账户</div>
+            <div class="kpi-value" style="color:var(--danger)">3</div>
+            <div class="kpi-sub">需立即处理</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="t-row th"><span>账户</span><span>合约/方向</span><span>保证金率</span><span>状态</span></div>
+          <div class="t-row">
+            <span class="mono">PI-00892</span>
+            <div><div>BTC 多头 10x</div><div class="cell-sub">名义 $83,241</div></div>
+            <span class="mono" style="color:var(--danger)">108.2%</span>
+            <span class="tag tag-warn">预警</span>
+          </div>
+          <div class="t-row">
+            <span class="mono">PI-00214</span>
+            <div><div>ETH 空头 8x</div><div class="cell-sub">名义 $21,563</div></div>
+            <span class="mono" style="color:var(--warning)">124.5%</span>
+            <span class="tag tag-ok">正常</span>
+          </div>
+          <div class="t-row">
+            <span class="mono">PI-00531</span>
+            <div><div>SOL 多头 5x</div><div class="cell-sub">名义 $9,120</div></div>
+            <span class="mono" style="color:var(--danger)">102.1%</span>
+            <span class="tag tag-danger">危险</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 按钮样式 -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">按钮样式</div>
+      <div class="btn-row">
+        <button class="btn btn-primary">提交申请</button>
+        <button class="btn btn-ghost">取消</button>
+        <button class="btn btn-danger-soft">强制平仓</button>
+      </div>
+    </div>
+
+    <!-- 操作流程步骤 -->
+    <div class="step-flow">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">变更审批流程</div>
+      <div class="step-row">
+        <div class="step"><div class="step-dot done">✓</div><div class="step-label">填写变更<br>原因</div></div>
+        <div class="step-line done"></div>
+        <div class="step"><div class="step-dot active">2</div><div class="step-label">Diff<br>确认</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-dot pending">3</div><div class="step-label">CRO<br>审核</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-dot pending">4</div><div class="step-label">生效<br>倒计时</div></div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-cell head">参数名称</div>
+        <div class="diff-cell head">原值</div>
+        <div class="diff-cell head">新值</div>
+        <div class="diff-cell param">资金费率上限</div>
+        <div class="diff-cell old">±0.2500%</div>
+        <div class="diff-cell new">±0.3000%</div>
+        <div class="diff-cell param">结算周期</div>
+        <div class="diff-cell old">—</div>
+        <div class="diff-cell new">每8小时</div>
+      </div>
+    </div>
+
+  </div><!-- /panel a -->
+
+  <!-- ══════ 方案 B：白色亮色 ══════ -->
+  <div class="panel b">
+    <div class="panel-label">方案 B — 白色亮色</div>
+
+    <!-- 完整布局预览 -->
+    <div class="layout-mock">
+      <div class="sidebar-mock">
+        <div class="sidebar-logo">BitV<span>VATP ADMIN</span></div>
+        <div class="s-section">监控</div>
+        <div class="s-item active">⬡ 总控台</div>
+        <div class="s-section">风险</div>
+        <div class="s-item">◈ 风控监控</div>
+        <div class="s-item">▽ 强平管理</div>
+        <div class="s-item">◉ 保险基金</div>
+        <div class="s-section">配置</div>
+        <div class="s-item">⊞ 合约配置</div>
+        <div class="s-item">↻ 资金费率</div>
+      </div>
+      <div class="main-mock">
+        <div class="topbar-mock">
+          <div class="page-title">总控台</div>
+          <span class="sfc-pill">⬡ SFC LIVE</span>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-label">活跃账户</div>
+            <div class="kpi-value">2,841</div>
+            <div class="kpi-sub">↑12 较昨日</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">保险基金</div>
+            <div class="kpi-value" style="color:var(--success)">$45.2M</div>
+            <div class="kpi-sub">储备充足</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">高危账户</div>
+            <div class="kpi-value" style="color:var(--danger)">3</div>
+            <div class="kpi-sub">需立即处理</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="t-row th"><span>账户</span><span>合约/方向</span><span>保证金率</span><span>状态</span></div>
+          <div class="t-row">
+            <span class="mono">PI-00892</span>
+            <div><div>BTC 多头 10x</div><div class="cell-sub">名义 $83,241</div></div>
+            <span class="mono" style="color:var(--danger)">108.2%</span>
+            <span class="tag tag-warn">预警</span>
+          </div>
+          <div class="t-row">
+            <span class="mono">PI-00214</span>
+            <div><div>ETH 空头 8x</div><div class="cell-sub">名义 $21,563</div></div>
+            <span class="mono" style="color:var(--warning)">124.5%</span>
+            <span class="tag tag-ok">正常</span>
+          </div>
+          <div class="t-row">
+            <span class="mono">PI-00531</span>
+            <div><div>SOL 多头 5x</div><div class="cell-sub">名义 $9,120</div></div>
+            <span class="mono" style="color:var(--danger)">102.1%</span>
+            <span class="tag tag-danger">危险</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 按钮样式 -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">按钮样式</div>
+      <div class="btn-row">
+        <button class="btn btn-primary">提交申请</button>
+        <button class="btn btn-ghost">取消</button>
+        <button class="btn btn-danger-soft">强制平仓</button>
+      </div>
+    </div>
+
+    <!-- 操作流程步骤 -->
+    <div class="step-flow">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">变更审批流程</div>
+      <div class="step-row">
+        <div class="step"><div class="step-dot done">✓</div><div class="step-label">填写变更<br>原因</div></div>
+        <div class="step-line done"></div>
+        <div class="step"><div class="step-dot active">2</div><div class="step-label">Diff<br>确认</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-dot pending">3</div><div class="step-label">CRO<br>审核</div></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="step-dot pending">4</div><div class="step-label">生效<br>倒计时</div></div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-cell head">参数名称</div>
+        <div class="diff-cell head">原值</div>
+        <div class="diff-cell head">新值</div>
+        <div class="diff-cell param">资金费率上限</div>
+        <div class="diff-cell old">±0.2500%</div>
+        <div class="diff-cell new">±0.3000%</div>
+        <div class="diff-cell param">结算周期</div>
+        <div class="diff-cell old">—</div>
+        <div class="diff-cell new">每8小时</div>
+      </div>
+    </div>
+
+  </div><!-- /panel b -->
+
+</div>
+</body>
+</html>

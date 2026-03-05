@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>变更管理 — BitV Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F7FA; --surface:#FFFFFF; --card:#FFFFFF; --card2:#F8FAFC;
+  --border:#E2E8F0; --border2:#CBD5E1;
+  --cyan:#0EA5C9; --cyan-a:rgba(14,165,201,.1);
+  --indigo:#7C78EE; --indigo-a:rgba(124,120,238,.12);
+  --success:#059669; --success-a:rgba(5,150,105,.1);
+  --warning:#D97706; --warning-a:rgba(217,119,6,.1);
+  --danger:#DC2626; --danger-a:rgba(220,38,38,.08);
+  --t1:#0F172A; --t2:#475569; --t3:#94A3B8;
+  --font-sans:'Plus Jakarta Sans','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-mono:'Space Mono','Courier New',monospace;
+  --font-display:'Syne','PingFang SC',sans-serif;
+  --r:8px; --r2:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:var(--font-sans);font-size:14px;display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo-text{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--cyan);letter-spacing:1px}
+.logo-sub{font-size:10px;color:var(--t3);margin-top:2px;letter-spacing:.5px}
+nav{padding:16px 12px;flex:1}
+.nav-section{font-size:10px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;padding:0 8px 8px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);color:var(--t2);text-decoration:none;font-size:12.5px;font-weight:500;transition:.15s;margin-bottom:2px}
+.nav-item:hover{background:var(--card2);color:var(--t1)}
+.nav-item.active{background:var(--cyan-a);color:var(--cyan)}
+.nav-icon{width:16px;text-align:center;font-size:14px}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
+.admin-badge{display:flex;align-items:center;gap:8px}
+.admin-avatar{width:28px;height:28px;border-radius:50%;background:var(--cyan-a);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--cyan);font-weight:700}
+.admin-name{font-size:11px;color:var(--t2)}
+.admin-role{font-size:10px;color:var(--t3)}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:10}
+.page-title{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--t1)}
+.page-sub{font-size:11px;color:var(--t3);margin-left:12px}
+.sfc-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;border:1px solid rgba(14,165,201,.3);background:var(--cyan-a);font-size:10px;color:var(--cyan);font-weight:600;letter-spacing:.5px}
+.content{padding:24px 28px;flex:1}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;font-family:var(--font-sans)}
+.btn-primary{background:var(--cyan);color:#fff}
+.btn-primary:hover{background:#0891b2}
+.btn-primary:disabled{background:var(--border2);color:var(--t3);cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-success{background:var(--success-a);color:var(--success);border:1px solid rgba(5,150,105,.25)}
+.btn-success:hover{background:rgba(5,150,105,.18)}
+.btn-danger{background:var(--danger-a);color:var(--danger);border:1px solid rgba(220,38,38,.25)}
+.btn-danger:hover{background:rgba(220,38,38,.14)}
+.btn-warn{background:var(--warning-a);color:var(--warning);border:1px solid rgba(217,119,6,.25)}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* ── Tags ── */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.2px}
+.tag-pending{background:var(--warning-a);color:var(--warning);border:1px solid rgba(217,119,6,.2)}
+.tag-reviewing{background:var(--cyan-a);color:var(--cyan);border:1px solid rgba(14,165,201,.2)}
+.tag-approved{background:var(--success-a);color:var(--success);border:1px solid rgba(5,150,105,.2)}
+.tag-rejected{background:var(--danger-a);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.tag-effective{background:var(--indigo-a);color:var(--indigo);border:1px solid rgba(124,120,238,.2)}
+.tag-sfc{background:var(--cyan-a);color:var(--cyan);border:1px solid rgba(14,165,201,.2);font-size:9px;letter-spacing:.8px}
+
+/* ── Two-column layout ── */
+.two-col{display:grid;grid-template-columns:380px 1fr;gap:20px;height:calc(100vh - 100px)}
+.left-panel{display:flex;flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.left-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.left-title{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--t1)}
+.queue-list{flex:1;overflow-y:auto}
+
+/* ── Queue items ── */
+.queue-item{padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:.12s;position:relative}
+.queue-item:last-child{border-bottom:none}
+.queue-item:hover{background:var(--card2)}
+.queue-item.active{background:var(--cyan-a);border-left:3px solid var(--cyan)}
+.queue-item.active .qi-title{color:var(--cyan)}
+.qi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.qi-title{font-size:13px;font-weight:600;color:var(--t1);line-height:1.3}
+.qi-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3);margin-bottom:6px}
+.qi-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--border2)}
+.qi-params{display:flex;flex-wrap:wrap;gap:4px}
+.qi-param-chip{padding:2px 7px;background:var(--card2);border:1px solid var(--border);border-radius:4px;font-size:10px;color:var(--t2)}
+.urgency-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.urgency-high{background:var(--danger)}
+.urgency-med{background:var(--warning)}
+.urgency-low{background:var(--success)}
+
+/* ── Right detail panel ── */
+.right-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;display:flex;flex-direction:column}
+.detail-header{padding:20px 24px 0;border-bottom:1px solid var(--border)}
+.detail-title-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.detail-title{font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--t1);line-height:1.2}
+.detail-meta{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--t3);margin-bottom:16px}
+.detail-meta strong{color:var(--t2)}
+
+/* ── Step bar ── */
+.step-bar{display:flex;align-items:center;gap:0;padding:0 0 20px}
+.step-node{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.step-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;position:relative;z-index:1}
+.step-circle.done{background:var(--cyan);color:#fff}
+.step-circle.active{background:var(--surface);color:var(--cyan);border:2px solid var(--cyan);box-shadow:0 0 0 4px var(--cyan-a)}
+.step-circle.pending{background:var(--card2);color:var(--t3);border:2px solid var(--border2)}
+.step-circle.rejected{background:var(--danger-a);color:var(--danger);border:2px solid var(--danger)}
+.step-label{font-size:10px;color:var(--t2);text-align:center;line-height:1.3;font-weight:500}
+.step-label.active-label{color:var(--cyan);font-weight:700}
+.step-connector{height:2px;flex:0.6;align-self:flex-start;margin-top:15px;border-radius:1px}
+.step-connector.done{background:var(--cyan)}
+.step-connector.pending{background:var(--border2)}
+
+/* ── Detail body ── */
+.detail-body{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* ── Diff table ── */
+.diff-section{margin-bottom:20px}
+.section-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.diff-table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.diff-table th{padding:9px 14px;text-align:left;font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.6px;text-transform:uppercase;background:var(--card2);border-bottom:1px solid var(--border)}
+.diff-table td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px}
+.diff-table tr:last-child td{border-bottom:none}
+.diff-table tr:hover td{background:rgba(0,0,0,.015)}
+.diff-old{color:var(--danger);font-family:var(--font-mono);font-size:12px;text-decoration:line-through;opacity:.7}
+.diff-new{color:var(--success);font-family:var(--font-mono);font-size:12px;font-weight:700}
+.diff-param{color:var(--t2);font-size:12px}
+.diff-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:3px;font-size:10px;font-family:var(--font-mono);font-weight:700}
+.diff-badge.inc{background:var(--success-a);color:var(--success)}
+.diff-badge.dec{background:var(--danger-a);color:var(--danger)}
+.diff-badge.chg{background:var(--warning-a);color:var(--warning)}
+
+/* ── Reason block ── */
+.reason-block{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:20px}
+.reason-author{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.reason-avatar{width:26px;height:26px;border-radius:50%;background:var(--indigo-a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--indigo)}
+.reason-name{font-size:12px;font-weight:600;color:var(--t1)}
+.reason-role{font-size:10px;color:var(--t3)}
+.reason-text{font-size:13px;color:var(--t2);line-height:1.65}
+
+/* ── Timeline ── */
+.timeline{display:flex;flex-direction:column;gap:0;margin-bottom:20px}
+.tl-item{display:flex;gap:12px;padding:10px 0;position:relative}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:11px;top:32px;bottom:0;width:2px;background:var(--border)}
+.tl-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;z-index:1}
+.tl-dot.done{background:var(--cyan);color:#fff}
+.tl-dot.active{background:var(--warning-a);color:var(--warning);border:2px solid var(--warning)}
+.tl-dot.pending{background:var(--card2);color:var(--t3);border:2px dashed var(--border2)}
+.tl-content{flex:1;padding-top:2px}
+.tl-title{font-size:13px;font-weight:600;color:var(--t1)}
+.tl-desc{font-size:11px;color:var(--t3);margin-top:2px;line-height:1.5}
+.tl-time{font-size:10px;color:var(--t3);font-family:var(--font-mono);margin-top:3px}
+
+/* ── Review action area ── */
+.review-action{border-top:1px solid var(--border);padding:20px 24px;background:var(--surface)}
+.review-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.review-tab{padding:8px 16px;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.12s}
+.review-tab:hover{color:var(--t2)}
+.review-tab.active-approve{color:var(--success);border-bottom-color:var(--success)}
+.review-tab.active-reject{color:var(--danger);border-bottom-color:var(--danger)}
+.review-form{display:none}
+.review-form.visible{display:block}
+.review-textarea{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);color:var(--t1);font-family:var(--font-sans);font-size:13px;padding:10px 12px;resize:none;outline:none;transition:.15s;line-height:1.6}
+.review-textarea:focus{border-color:var(--cyan)}
+.review-actions-row{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.sfc-note{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px}
+
+/* ── Effective countdown ── */
+.countdown-card{background:var(--indigo-a);border:1px solid rgba(124,120,238,.2);border-radius:var(--r);padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:16px}
+.countdown-icon{font-size:24px}
+.countdown-time{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--indigo)}
+.countdown-label{font-size:11px;color:var(--t2);margin-top:2px}
+
+/* ── Empty state ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:40px}
+.empty-icon{font-size:40px;opacity:.3}
+.empty-text{font-size:14px;color:var(--t3);text-align:center}
+
+/* ── Stats bar ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.stat-icon{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.stat-num{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--t1);line-height:1}
+.stat-label{font-size:11px;color:var(--t3);margin-top:3px}
+
+/* ── Input ── */
+.form-input{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);color:var(--t1);font-family:var(--font-sans);font-size:13px;padding:8px 12px;outline:none;transition:.15s;width:100%}
+.form-input:focus{border-color:var(--cyan)}
+.form-label{font-size:11px;color:var(--t2);font-weight:600;margin-bottom:5px;display:block}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-text">BitV Admin</div>
+    <div class="logo-sub">VATP BACKEND · HK SFC REGULATED</div>
+  </div>
+  <nav>
+    <div class="nav-section">核心监控</div>
+    <a href="01_总控台.html" class="nav-item"><span class="nav-icon">⬡</span>总控台</a>
+    <div class="nav-section">用户与合规</div>
+    <a href="02_用户管理.html" class="nav-item"><span class="nav-icon">◎</span>用户管理 / PI 审核</a>
+    <div class="nav-section">风险管理</div>
+    <a href="03_风控监控.html" class="nav-item"><span class="nav-icon">◈</span>风控监控</a>
+    <a href="04_强平管理.html" class="nav-item"><span class="nav-icon">▽</span>强制平仓管理</a>
+    <a href="05_保险基金.html" class="nav-item"><span class="nav-icon">◉</span>保险基金</a>
+    <a href="06_ADL系统.html" class="nav-item"><span class="nav-icon">⇅</span>ADL 系统</a>
+    <div class="nav-section">系统配置</div>
+    <a href="07_合约配置.html" class="nav-item"><span class="nav-icon">⊞</span>合约配置</a>
+    <a href="08_资金费率.html" class="nav-item"><span class="nav-icon">↻</span>资金费率</a>
+    <div class="nav-section">运营管理</div>
+    <a href="09_变更管理.html" class="nav-item active"><span class="nav-icon">✦</span>变更管理</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-badge">
+      <div class="admin-avatar">SA</div>
+      <div>
+        <div class="admin-name">Super Admin</div>
+        <div class="admin-role">Chief Risk Officer</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center">
+      <span class="page-title">变更管理</span>
+      <span class="page-sub">操作审批流程 · Change Request Management</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="sfc-badge">⬡ SFC 合规审计</div>
+      <!-- 视角切换 -->
+      <div style="display:flex;background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:3px;gap:2px">
+        <button id="btn-reviewer" class="btn btn-sm" style="background:var(--cyan);color:#fff;border:none" onclick="switchRole('reviewer')">审核人视角</button>
+        <button id="btn-operator" class="btn btn-sm btn-ghost" style="border:none" onclick="switchRole('operator')">操作员视角</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="content" style="padding-bottom:0;overflow:hidden">
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--warning-a)">⏳</div>
+        <div><div class="stat-num" style="color:var(--warning)">3</div><div class="stat-label">待审核</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--success-a)">✓</div>
+        <div><div class="stat-num" style="color:var(--success)">12</div><div class="stat-label">本月已批准</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--danger-a)">✕</div>
+        <div><div class="stat-num" style="color:var(--danger)">2</div><div class="stat-label">本月已驳回</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--indigo-a)">↻</div>
+        <div><div class="stat-num" style="color:var(--indigo)">1</div><div class="stat-label">待生效</div></div>
+      </div>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="two-col">
+
+      <!-- Left: queue -->
+      <div class="left-panel">
+        <div class="left-header">
+          <span class="left-title">变更申请队列</span>
+          <span class="tag tag-pending">3 待处理</span>
+        </div>
+        <div class="queue-list">
+
+          <!-- Item 1 — active -->
+          <div class="queue-item active" onclick="showDetail('cr001')">
+            <div class="qi-top">
+              <span class="qi-title">BTCUSDT · 资金费率上限调整</span>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <span class="tag tag-reviewing">审核中</span>
+                <div class="urgency-dot urgency-high" title="高优先级"></div>
+              </div>
+            </div>
+            <div class="qi-meta">
+              <span>T.Lee · Quant</span>
+              <span class="qi-meta-dot"></span>
+              <span>2026-03-05 09:14</span>
+              <span class="qi-meta-dot"></span>
+              <span style="color:var(--danger);font-weight:600">高优先级</span>
+            </div>
+            <div class="qi-params">
+              <span class="qi-param-chip">Cap: 0.25% → 0.30%</span>
+              <span class="qi-param-chip">BTCUSDT</span>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="queue-item" onclick="showDetail('cr002')">
+            <div class="qi-top">
+              <span class="qi-title">SOLUSDT · 最高杠杆下调</span>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <span class="tag tag-pending">待审核</span>
+                <div class="urgency-dot urgency-med" title="中优先级"></div>
+              </div>
+            </div>
+            <div class="qi-meta">
+              <span>L.Lam · 系统工程师</span>
+              <span class="qi-meta-dot"></span>
+              <span>2026-03-05 08:42</span>
+              <span class="qi-meta-dot"></span>
+              <span style="color:var(--warning);font-weight:600">中优先级</span>
+            </div>
+            <div class="qi-params">
+              <span class="qi-param-chip">杠杆: 20x → 10x</span>
+              <span class="qi-param-chip">SOLUSDT</span>
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="queue-item" onclick="showDetail('cr003')">
+            <div class="qi-top">
+              <span class="qi-title">全局 · 标记价格熔断阈值调整</span>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <span class="tag tag-pending">待审核</span>
+                <div class="urgency-dot urgency-low" title="低优先级"></div>
+              </div>
+            </div>
+            <div class="qi-meta">
+              <span>S.Chan · CRO</span>
+              <span class="qi-meta-dot"></span>
+              <span>2026-03-04 17:30</span>
+              <span class="qi-meta-dot"></span>
+              <span style="color:var(--success);font-weight:600">低优先级</span>
+            </div>
+            <div class="qi-params">
+              <span class="qi-param-chip">熔断: 2.00% → 1.50%</span>
+              <span class="qi-param-chip">全局</span>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div style="padding:10px 18px;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;background:var(--card2);border-bottom:1px solid var(--border)">已处理记录</div>
+
+          <!-- Item 4 - approved -->
+          <div class="queue-item" onclick="showDetail('cr004')" style="opacity:.7">
+            <div class="qi-top">
+              <span class="qi-title">BTCUSDT · 强平手续费率调整</span>
+              <span class="tag tag-approved">已批准</span>
+            </div>
+            <div class="qi-meta">
+              <span>S.Chan · CRO</span>
+              <span class="qi-meta-dot"></span>
+              <span>2026-02-28 14:32</span>
+            </div>
+            <div class="qi-params">
+              <span class="qi-param-chip">强平费: 1.00% → 1.25%</span>
+              <span style="font-size:10px;color:var(--success);font-weight:600">已于 2026-03-03 生效</span>
+            </div>
+          </div>
+
+          <!-- Item 5 - rejected -->
+          <div class="queue-item" onclick="showDetail('cr005')" style="opacity:.7">
+            <div class="qi-top">
+              <span class="qi-title">ETHUSDT · Maker 费率下调</span>
+              <span class="tag tag-rejected">已驳回</span>
+            </div>
+            <div class="qi-meta">
+              <span>T.Lee · Quant</span>
+              <span class="qi-meta-dot"></span>
+              <span>2026-01-28 10:22</span>
+            </div>
+            <div class="qi-params">
+              <span class="qi-param-chip">Maker: 0.030% → 0.020%</span>
+              <span style="font-size:10px;color:var(--danger);font-weight:600">CO 驳回：需重新评估</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right: detail -->
+      <div class="right-panel" id="detail-panel">
+
+        <!-- ══ CR-001 Detail ══ -->
+        <div id="detail-cr001" style="display:flex;flex-direction:column;height:100%">
+          <div class="detail-header">
+            <div class="detail-title-row">
+              <div>
+                <div style="font-size:11px;color:var(--t3);font-family:var(--font-mono);margin-bottom:6px">CR-2026-001</div>
+                <div class="detail-title">BTCUSDT 资金费率上限调整</div>
+              </div>
+              <span class="tag tag-reviewing" style="font-size:12px;padding:4px 10px">审核中</span>
+            </div>
+            <div class="detail-meta">
+              <span>发起人：<strong>T.Lee (Quant)</strong></span>
+              <span>·</span>
+              <span>提交时间：<strong>2026-03-05 09:14 HKT</strong></span>
+              <span>·</span>
+              <span>预计生效：<strong>2026-03-08 00:00 UTC</strong></span>
+              <span class="tag tag-sfc" style="margin-left:4px">SFC 备案</span>
+            </div>
+            <!-- Step bar -->
+            <div class="step-bar">
+              <div class="step-node">
+                <div class="step-circle done">✓</div>
+                <div class="step-label">提交申请</div>
+              </div>
+              <div class="step-connector done"></div>
+              <div class="step-node">
+                <div class="step-circle done">✓</div>
+                <div class="step-label">Diff 确认</div>
+              </div>
+              <div class="step-connector done"></div>
+              <div class="step-node">
+                <div class="step-circle active">3</div>
+                <div class="step-label active-label">CRO 审核</div>
+              </div>
+              <div class="step-connector pending"></div>
+              <div class="step-node">
+                <div class="step-circle pending">4</div>
+                <div class="step-label">CO 副签</div>
+              </div>
+              <div class="step-connector pending"></div>
+              <div class="step-node">
+                <div class="step-circle pending">5</div>
+                <div class="step-label">生效倒计时</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-body">
+
+            <!-- Diff table -->
+            <div class="diff-section">
+              <div class="section-label">📋 变更内容（Diff）</div>
+              <table class="diff-table">
+                <thead>
+                  <tr>
+                    <th style="width:140px">参数名称</th>
+                    <th>原值</th>
+                    <th>新值</th>
+                    <th style="width:80px">变化</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="diff-param">资金费率上限 (Cap)</td>
+                    <td><span class="diff-old">±0.2500%</span></td>
+                    <td><span class="diff-new">±0.3000%</span></td>
+                    <td><span class="diff-badge inc">+0.05%</span></td>
+                  </tr>
+                  <tr>
+                    <td class="diff-param">资金费率下限 (Floor)</td>
+                    <td><span class="diff-old">-0.2500%</span></td>
+                    <td><span class="diff-new">-0.3000%</span></td>
+                    <td><span class="diff-badge dec">-0.05%</span></td>
+                  </tr>
+                  <tr>
+                    <td class="diff-param">生效合约</td>
+                    <td><span class="diff-old">—</span></td>
+                    <td><span class="diff-new">BTCUSDT</span></td>
+                    <td><span class="diff-badge chg">范围</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Reason -->
+            <div class="diff-section">
+              <div class="section-label">💬 变更原因</div>
+              <div class="reason-block">
+                <div class="reason-author">
+                  <div class="reason-avatar">TL</div>
+                  <div>
+                    <div class="reason-name">T.Lee</div>
+                    <div class="reason-role">Quant · 2026-03-05 09:14</div>
+                  </div>
+                </div>
+                <div class="reason-text">
+                  当前 BTC 市场波动率（30D realized vol）处于 52% 历史高位，现行 ±0.25% 的资金费率上限过于保守，导致合约价格与现货指数长期偏离，影响套利效率。参考 Binance（±0.75%）及 OKX（±0.50%）同类产品，建议将上限调整至 ±0.30%，仍显著低于离岸所水平，符合 SFC ASPIRe PillarP 要求。
+                </div>
+              </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="diff-section">
+              <div class="section-label">⏱ 审批进度</div>
+              <div class="timeline">
+                <div class="tl-item">
+                  <div class="tl-dot done">✓</div>
+                  <div class="tl-content">
+                    <div class="tl-title">变更申请提交</div>
+                    <div class="tl-desc">T.Lee 填写变更原因并确认 Diff，提交至审批队列</div>
+                    <div class="tl-time">2026-03-05 09:14 HKT</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot done">✓</div>
+                  <div class="tl-content">
+                    <div class="tl-title">系统 Diff 验证通过</div>
+                    <div class="tl-desc">参数变更范围检查通过，未超出 SFC 合规边界</div>
+                    <div class="tl-time">2026-03-05 09:14 HKT（自动）</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot active">…</div>
+                  <div class="tl-content">
+                    <div class="tl-title" style="color:var(--warning)">等待 CRO 审核</div>
+                    <div class="tl-desc">已发送通知至 S.Chan (CRO)，SLA：4 小时内处理</div>
+                    <div class="tl-time">2026-03-05 09:14 HKT · 已等待 1h 23m</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot pending">4</div>
+                  <div class="tl-content">
+                    <div class="tl-title" style="color:var(--t3)">等待 CO 副签</div>
+                    <div class="tl-desc" style="color:var(--t3)">K.Wong (Compliance Officer) 副签确认</div>
+                    <div class="tl-time" style="color:var(--t3)">待定</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot pending">5</div>
+                  <div class="tl-content">
+                    <div class="tl-title" style="color:var(--t3)">生效倒计时</div>
+                    <div class="tl-desc" style="color:var(--t3)">预计 2026-03-08 00:00 UTC 生效，自动推送 SFC 备案</div>
+                    <div class="tl-time" style="color:var(--t3)">待定</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /detail-body -->
+
+          <!-- Review action area (reviewer view) -->
+          <div class="review-action" id="review-area-cr001">
+            <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px">CRO 审核操作</div>
+            <div class="review-tabs">
+              <div class="review-tab active-approve" id="tab-approve" onclick="switchReviewTab('approve')">批准此变更</div>
+              <div class="review-tab" id="tab-reject" onclick="switchReviewTab('reject')">驳回此变更</div>
+            </div>
+            <!-- Approve form -->
+            <div class="review-form visible" id="form-approve">
+              <label class="form-label">审核意见（可选）</label>
+              <textarea class="review-textarea" rows="2" placeholder="如无异议可留空，或填写批准条件…"></textarea>
+              <div class="review-actions-row">
+                <div class="sfc-note">⬡ 批准后将自动触发 CO 副签流程，3 个工作日后生效</div>
+                <button class="btn btn-success" onclick="handleApprove()">✓ 确认批准</button>
+              </div>
+            </div>
+            <!-- Reject form -->
+            <div class="review-form" id="form-reject">
+              <label class="form-label">驳回原因 <span style="color:var(--danger)">*必填</span></label>
+              <textarea class="review-textarea" rows="2" placeholder="请填写具体驳回原因，将通知申请人修改后重新提交…"></textarea>
+              <div class="review-actions-row">
+                <div class="sfc-note">⬡ 驳回记录将写入审计日志并通知申请人</div>
+                <button class="btn btn-danger" onclick="handleReject()">✕ 确认驳回</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Post-approve state (hidden by default) -->
+          <div class="review-action" id="approved-state-cr001" style="display:none">
+            <div class="countdown-card">
+              <div class="countdown-icon">⏱</div>
+              <div>
+                <div class="countdown-time" id="effective-countdown">71:38:22</div>
+                <div class="countdown-label">距生效时间 · 2026-03-08 00:00 UTC · 等待 CO 副签中</div>
+              </div>
+              <div style="margin-left:auto;text-align:right">
+                <div style="font-size:11px;color:var(--t3)">SFC 备案状态</div>
+                <div style="font-size:12px;font-weight:600;color:var(--indigo);margin-top:2px">📤 已推送备案</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:var(--t3)">S.Chan 已于 2026-03-05 10:37 HKT 批准 · 等待 K.Wong (CO) 副签</div>
+              <button class="btn btn-ghost btn-sm">撤回申请</button>
+            </div>
+          </div>
+        </div><!-- /cr001 -->
+
+        <!-- ══ CR-002 Detail (hidden) ══ -->
+        <div id="detail-cr002" style="display:none;flex-direction:column;height:100%">
+          <div class="detail-header">
+            <div class="detail-title-row">
+              <div>
+                <div style="font-size:11px;color:var(--t3);font-family:var(--font-mono);margin-bottom:6px">CR-2026-002</div>
+                <div class="detail-title">SOLUSDT 最高杠杆下调</div>
+              </div>
+              <span class="tag tag-pending" style="font-size:12px;padding:4px 10px">待审核</span>
+            </div>
+            <div class="detail-meta">
+              <span>发起人：<strong>L.Lam (系统工程师)</strong></span>
+              <span>·</span>
+              <span>提交时间：<strong>2026-03-05 08:42 HKT</strong></span>
+              <span class="tag tag-sfc" style="margin-left:4px">SFC 备案</span>
+            </div>
+            <div class="step-bar">
+              <div class="step-node"><div class="step-circle done">✓</div><div class="step-label">提交申请</div></div>
+              <div class="step-connector done"></div>
+              <div class="step-node"><div class="step-circle done">✓</div><div class="step-label">Diff 确认</div></div>
+              <div class="step-connector pending"></div>
+              <div class="step-node"><div class="step-circle active">3</div><div class="step-label active-label">CRO 审核</div></div>
+              <div class="step-connector pending"></div>
+              <div class="step-node"><div class="step-circle pending">4</div><div class="step-label">CO 副签</div></div>
+              <div class="step-connector pending"></div>
+              <div class="step-node"><div class="step-circle pending">5</div><div class="step-label">生效倒计时</div></div>
+            </div>
+          </div>
+          <div class="detail-body">
+            <div class="diff-section">
+              <div class="section-label">📋 变更内容（Diff）</div>
+              <table class="diff-table">
+                <thead><tr><th>参数名称</th><th>原值</th><th>新值</th><th>变化</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="diff-param">SOLUSDT 最高杠杆</td>
+                    <td><span class="diff-old">20x</span></td>
+                    <td><span class="diff-new">10x</span></td>
+                    <td><span class="diff-badge dec">-10x</span></td>
+                  </tr>
+                  <tr>
+                    <td class="diff-param">初始保证金率（最高杠杆档）</td>
+                    <td><span class="diff-old">5.00%</span></td>
+                    <td><span class="diff-new">10.00%</span></td>
+                    <td><span class="diff-badge inc">+5%</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="diff-section">
+              <div class="section-label">💬 变更原因</div>
+              <div class="reason-block">
+                <div class="reason-author">
+                  <div class="reason-avatar" style="background:var(--success-a);color:var(--success)">LL</div>
+                  <div><div class="reason-name">L.Lam</div><div class="reason-role">系统工程师 · 2026-03-05 08:42</div></div>
+                </div>
+                <div class="reason-text">SOL 近期链上活动异常，链上 TVL 单日波动超过 18%。风控模型显示在 20x 杠杆下，极端行情中保险基金消耗概率超过 5%（超出 SFC 要求阈值）。建议保守下调至 10x，与 ETH 同档，待市场稳定后再评估恢复。</div>
+              </div>
+            </div>
+          </div>
+          <div class="review-action">
+            <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px">CRO 审核操作</div>
+            <div class="review-tabs">
+              <div class="review-tab active-approve">批准此变更</div>
+              <div class="review-tab">驳回此变更</div>
+            </div>
+            <div class="review-form visible">
+              <label class="form-label">审核意见（可选）</label>
+              <textarea class="review-textarea" rows="2" placeholder="如无异议可留空…"></textarea>
+              <div class="review-actions-row">
+                <div class="sfc-note">⬡ 批准后自动触发 CO 副签，3 个工作日后生效</div>
+                <button class="btn btn-success">✓ 确认批准</button>
+              </div>
+            </div>
+          </div>
+        </div><!-- /cr002 -->
+
+        <!-- ══ CR-004 (Approved, effective) ══ -->
+        <div id="detail-cr004" style="display:none;flex-direction:column;height:100%">
+          <div class="detail-header">
+            <div class="detail-title-row">
+              <div>
+                <div style="font-size:11px;color:var(--t3);font-family:var(--font-mono);margin-bottom:6px">CR-2026-004</div>
+                <div class="detail-title">BTCUSDT 强平手续费率调整</div>
+              </div>
+              <span class="tag tag-effective" style="font-size:12px;padding:4px 10px">已生效</span>
+            </div>
+            <div class="detail-meta">
+              <span>发起人：<strong>S.Chan (CRO)</strong></span><span>·</span>
+              <span>提交：<strong>2026-02-28 14:32</strong></span><span>·</span>
+              <span>生效：<strong>2026-03-03 00:00 UTC</strong></span>
+            </div>
+            <div class="step-bar">
+              <div class="step-node"><div class="step-circle done">✓</div><div class="step-label">提交申请</div></div>
+              <div class="step-connector done"></div>
+              <div class="step-node"><div class="step-circle done">✓</div><div class="step-label">Diff 确认</div></div>
+              <div class="step-connector done"></div>
+              <div class="step-node"><div class="step-circle done">✓</div><div class="step-label">CRO 审核</div></div>
+              <div class="step-connector done"></div>
+              <div class="step-node"><div class="step-circle done">✓</div><div class="step-label">CO 副签</div></div>
+              <div class="step-connector done"></div>
+              <div class="step-node"><div class="step-circle done">✓</div><div class="step-label">已生效</div></div>
+            </div>
+          </div>
+          <div class="detail-body">
+            <div style="padding:14px;background:var(--success-a);border:1px solid rgba(5,150,105,.2);border-radius:var(--r);margin-bottom:16px;font-size:13px;color:var(--success);font-weight:600">
+              ✓ 此变更已于 2026-03-03 00:00 UTC 正式生效，SFC 备案编号：SFC-2026-CR-004
+            </div>
+            <div class="diff-section">
+              <div class="section-label">📋 已生效变更内容</div>
+              <table class="diff-table">
+                <thead><tr><th>参数名称</th><th>变更前</th><th>变更后</th><th>变化</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="diff-param">强平手续费率</td>
+                    <td><span class="diff-old">1.00%</span></td>
+                    <td><span class="diff-new">1.25%</span></td>
+                    <td><span class="diff-badge inc">+0.25%</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="diff-section">
+              <div class="section-label">⏱ 完整审批记录</div>
+              <div class="timeline">
+                <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-content"><div class="tl-title">S.Chan 提交申请</div><div class="tl-time">2026-02-28 14:32 HKT</div></div></div>
+                <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-content"><div class="tl-title">CRO 审核通过</div><div class="tl-desc">S.Chan 批准：与 SFC 阶段性披露要求一致</div><div class="tl-time">2026-02-28 15:10 HKT</div></div></div>
+                <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-content"><div class="tl-title">CO 副签确认</div><div class="tl-desc">K.Wong 副签：合规审查通过</div><div class="tl-time">2026-02-28 16:45 HKT</div></div></div>
+                <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-content"><div class="tl-title">SFC 备案推送</div><div class="tl-desc">备案编号：SFC-2026-CR-004，确认回执已收到</div><div class="tl-time">2026-02-28 17:00 HKT（自动）</div></div></div>
+                <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-content"><div class="tl-title">参数正式生效</div><div class="tl-time">2026-03-03 00:00 UTC</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="review-action" style="background:var(--card2)">
+            <div style="font-size:12px;color:var(--t3);text-align:center">此变更已完成全部审批流程并生效 · 审计记录已存档</div>
+          </div>
+        </div><!-- /cr004 -->
+
+      </div><!-- /right-panel -->
+    </div><!-- /two-col -->
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ── Detail switching ──
+function showDetail(id) {
+  document.querySelectorAll('[id^="detail-cr"]').forEach(el => {
+    el.style.display = 'none';
+  });
+  const target = document.getElementById('detail-' + id);
+  if (target) target.style.display = 'flex';
+
+  document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// ── Review tab switching ──
+function switchReviewTab(tab) {
+  document.getElementById('tab-approve').className = 'review-tab' + (tab === 'approve' ? ' active-approve' : '');
+  document.getElementById('tab-reject').className = 'review-tab' + (tab === 'reject' ? ' active-reject' : '');
+  document.getElementById('form-approve').className = 'review-form' + (tab === 'approve' ? ' visible' : '');
+  document.getElementById('form-reject').className = 'review-form' + (tab === 'reject' ? ' visible' : '');
+}
+
+// ── Approve action ──
+function handleApprove() {
+  document.getElementById('review-area-cr001').style.display = 'none';
+  document.getElementById('approved-state-cr001').style.display = 'block';
+  // Update queue item tag
+  document.querySelector('.queue-item.active .tag').className = 'tag tag-effective';
+  document.querySelector('.queue-item.active .tag').textContent = '待生效';
+  startCountdown();
+}
+
+// ── Reject action ──
+function handleReject() {
+  const ta = document.querySelector('#form-reject .review-textarea');
+  if (!ta.value.trim()) { ta.style.borderColor = 'var(--danger)'; ta.focus(); return; }
+  ta.style.borderColor = '';
+  document.querySelector('.queue-item.active .tag').className = 'tag tag-rejected';
+  document.querySelector('.queue-item.active .tag').textContent = '已驳回';
+  document.querySelector('#review-area-cr001').innerHTML =
+    `<div style="text-align:center;padding:16px;font-size:13px;color:var(--danger)">
+      ✕ 已驳回 · 已通知申请人 T.Lee · 驳回理由已写入审计日志
+    </div>`;
+}
+
+// ── Role switching ──
+function switchRole(role) {
+  const ra = document.getElementById('review-area-cr001');
+  const ba = document.getElementById('approved-state-cr001');
+  const btnR = document.getElementById('btn-reviewer');
+  const btnO = document.getElementById('btn-operator');
+  if (role === 'reviewer') {
+    btnR.style.cssText = 'background:var(--cyan);color:#fff;border:none';
+    btnO.style.cssText = 'background:transparent;color:var(--t2);border:none';
+    if (ra) ra.style.display = '';
+  } else {
+    btnO.style.cssText = 'background:var(--cyan);color:#fff;border:none';
+    btnR.style.cssText = 'background:transparent;color:var(--t2);border:none';
+    if (ra) ra.style.display = 'none';
+    if (ba) ba.style.display = 'none';
+    // Show operator view
+    const rb = document.getElementById('review-area-cr001');
+    if (rb) {
+      rb.innerHTML = `
+        <div style="padding:4px 0">
+          <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:10px">操作员视角 — 申请进度</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--warning-a);border:1px solid rgba(217,119,6,.2);border-radius:var(--r)">
+            <span style="font-size:20px">⏳</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--warning)">等待 CRO 审核中</div>
+              <div style="font-size:11px;color:var(--t3);margin-top:2px">已提交 1h 23m · SLA 4小时 · 审核人：S.Chan (CRO) · 如超时将自动发送催办通知</div>
+            </div>
+          </div>
+        </div>`;
+      rb.style.display = '';
+    }
+  }
+}
+
+// ── Countdown ──
+function startCountdown() {
+  let secs = 71 * 3600 + 38 * 60 + 22;
+  const el = document.getElementById('effective-countdown');
+  if (!el) return;
+  const t = setInterval(() => {
+    if (secs <= 0) { clearInterval(t); el.textContent = '00:00:00'; return; }
+    secs--;
+    const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+    el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }, 1000);
+}
+</script>
+</body>
+</html>

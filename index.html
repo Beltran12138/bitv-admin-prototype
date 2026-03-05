@@ -8,20 +8,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#060C18;--surface:#0B1220;--card:#0F1A2E;--card2:#132035;
-  --border:#1A2B42;--border2:#243650;
-  --cyan:#00C6E0;--cyan-a:rgba(0,198,224,.1);
-  --indigo:#7C78EE;--indigo-a:rgba(124,120,238,.1);
-  --success:#00D4A0;--success-a:rgba(0,212,160,.1);
-  --warning:#FFB300;--warning-a:rgba(255,179,0,.1);
-  --danger:#FF4757;
-  --t1:#DDE6F0;--t2:#6B85A2;--t3:#384C64;
+  --bg:#F5F7FA; --surface:#FFFFFF; --card:#FFFFFF; --card2:#F8FAFC;
+  --border:#E2E8F0; --border2:#CBD5E1;
+  --cyan:#0EA5C9; --cyan-a:rgba(14,165,201,.1);
+  --indigo:#7C78EE; --indigo-a:rgba(124,120,238,.12);
+  --success:#059669; --success-a:rgba(5,150,105,.1);
+  --warning:#D97706; --warning-a:rgba(217,119,6,.1);
+  --danger:#DC2626;
+  --t1:#0F172A; --t2:#475569; --t3:#94A3B8;
   --font-sans:'Plus Jakarta Sans','PingFang SC','Microsoft YaHei',sans-serif;
   --font-mono:'Space Mono','Courier New',monospace;
   --font-display:'Syne','PingFang SC',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--t1);font-family:var(--font-sans);min-height:100vh}
+body{background:#F5F7FA;color:var(--t1);font-family:var(--font-sans);min-height:100vh}
 
 /* ── Hero ── */
 .hero{padding:72px 0 56px;text-align:center;position:relative;overflow:hidden}
@@ -34,7 +34,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font-sans);min-heigh
 .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;border:1px solid rgba(0,198,224,.3);background:var(--cyan-a);font-size:11px;font-weight:600;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:28px}
 .hero-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero h1{font-family:var(--font-display);font-size:52px;font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:16px;background:linear-gradient(135deg,#DDE6F0 30%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero h1{font-family:var(--font-display);font-size:52px;font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:16px;background:linear-gradient(135deg,#0F172A 30%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero-sub{font-size:15px;color:var(--t2);max-width:540px;margin:0 auto 36px;line-height:1.7}
 .hero-badges{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:.5px}
